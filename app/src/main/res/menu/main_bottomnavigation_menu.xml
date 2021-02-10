@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/albumsOverviewFragment"
+        android:title="@string/albums"
+        android:icon="@drawable/ic_album"/>
+    <item
+        android:id="@+id/searchArtistFragment"
+        android:icon="@drawable/ic_search"
+        android:title="@string/search"/>
+</menu>
