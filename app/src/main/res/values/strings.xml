@@ -3,4 +3,5 @@
     <string name="albums">Albums</string>
     <string name="search">Search</string>
     <string name="search_artists">Search Artists</string>
+    <string name="search_artists_hint">Search for an artist…</string>
 </resources>

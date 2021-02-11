@@ -4,11 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.albumsoverview.SearchArtistFragment">
+    tools:context=".ui.searchartist.SearchArtistFragment">
 
     <androidx.appcompat.widget.SearchView
         android:id="@+id/searchview_search_artist"
         android:layout_width="0dp"
+        app:queryHint="@string/search_artists_hint"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
@@ -39,7 +40,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:alpha="0.03"
+        android:alpha="0.009"
         android:background="@android:color/transparent"
         android:layout_width="0dp"
         android:layout_height="0dp"

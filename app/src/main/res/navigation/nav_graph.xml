@@ -11,7 +11,7 @@
         tools:layout="@layout/fragment_albums_overview" />
     <fragment
         android:id="@+id/searchArtistFragment"
-        android:name="de.ericmuench.appsfactorytesttask.ui.albumsoverview.SearchArtistFragment"
+        android:name="de.ericmuench.appsfactorytesttask.ui.searchartist.SearchArtistFragment"
         android:label="@string/search_artists"
         tools:layout="@layout/fragment_search_artist" />
 </navigation>
