@@ -28,6 +28,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     //help functions for layout setup
+    /**
+     * This function sets up the Toolbar of this activity.
+     * @param binding The Binding for this class to access layout components
+     * @param navControl The NavController to link the action bar title with the current fragment
+     */
     private fun setupToolbar(binding: ActivityMainBinding, navControl : NavController) = with(binding){
         setSupportActionBar(toolbarMain.root)
         val appBarConfig = AppBarConfiguration(
@@ -39,6 +44,11 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navControl,appBarConfig)
     }
 
+    /**
+     * This functions sets up the Navigation via BottomNavigation
+     * @param binding The Binding for this class to access layout components
+     * @param navControl The NavController to be linked with the BottomNavigation
+     */
     private fun setupNavigation(binding: ActivityMainBinding, navControl : NavController)
         = binding.bottomNavigationMain.setupWithNavController(navControl)
 
