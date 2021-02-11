@@ -16,6 +16,7 @@
         <item name="android:colorBackground">@color/white</item>
     </style>
 
+
     <style name="StyleButton" parent="@style/Widget.MaterialComponents.Button">
         <item name="android:backgroundTint">@color/gray_700</item>
         <item name="android:textColor">@color/white</item>
