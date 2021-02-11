@@ -7,6 +7,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import de.ericmuench.appsfactorytesttask.BuildConfig
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.databinding.ActivityMainBinding
 
@@ -20,6 +21,7 @@ class MainActivity : AppCompatActivity() {
         //viewbinding
         val viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
+
 
         //setup Layout
         val navController = findNavController(R.id.nav_host_fragment_container_main)
