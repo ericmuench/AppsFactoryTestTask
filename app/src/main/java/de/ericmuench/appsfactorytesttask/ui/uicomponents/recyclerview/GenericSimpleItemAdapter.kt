@@ -4,14 +4,29 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.button.MaterialButtonToggleGroup
 import de.ericmuench.appsfactorytesttask.R
 
-//TODO: Documentation
+/**
+ * This typealias should facilitate the work with the functional type for the apply event.
+ * The type of this typealias should allow the access to the Adapter within the closure
+ * of onApplyDataToViewHolder of the class. Further to that, you can use the ViewHolder, the current
+ * element and the positions to apply your data to the basic UI-Components of the ViewHolder as
+ * you like.
+ */
+private typealias OnApplyEventListener<T>
+        = GenericSimpleItemAdapter<T>.(GenericSimpleItemAdapter.GenericSimpleItemViewHolder, T, Int) -> Unit
+
+/**
+ * This class defines a Recyclerview-Adapter for generic purposes to bind arbitrary elements to
+ * a simple Item. For this it uses an @see OnApplyEventListener<T> and Fluent-API-Syntax.
+ * This can be used to applying data to the ViewHolders UI-Components as you specify it in
+ * onApplyDataToViewHolder.
+ *
+ */
 class GenericSimpleItemAdapter<T>(
         private val context : Context,
         adapterData : Iterable<T>
@@ -24,7 +39,7 @@ class GenericSimpleItemAdapter<T>(
     /**
      * This field handles the bind operation for the ViewHolder and is called in @see onBindViewHolder.
      * */
-    private var onApplyDataToViewHolder : (GenericSimpleItemViewHolder,T) -> Unit = {_,_ -> }
+    private var onApplyDataToViewHolder : OnApplyEventListener<T> = {_,_,_ -> }
 
     //Functions for Adapter
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericSimpleItemViewHolder {
@@ -34,7 +49,7 @@ class GenericSimpleItemAdapter<T>(
 
     override fun onBindViewHolder(holder: GenericSimpleItemViewHolder, position: Int) {
         val element = data[position]
-        onApplyDataToViewHolder.invoke(holder,element)
+        onApplyDataToViewHolder.invoke(this,holder,element,position)
     }
 
     override fun getItemCount(): Int = data.size
@@ -45,7 +60,7 @@ class GenericSimpleItemAdapter<T>(
      * @param applyFunc The value that should be contained in @see onApplyDataToViewHolder
      * @return this object to provide Fluent-Api-Syntax
      */
-    fun onApplyDataToViewHolder(applyFunc : (GenericSimpleItemViewHolder,T) -> Unit)
+    fun onApplyDataToViewHolder(applyFunc : OnApplyEventListener<T>)
         : GenericSimpleItemAdapter<T> {
         onApplyDataToViewHolder = applyFunc
         return this
@@ -81,7 +96,6 @@ class GenericSimpleItemAdapter<T>(
     class GenericSimpleItemViewHolder(view: View) : RecyclerView.ViewHolder(view){
         val cardView: CardView = view.findViewById(R.id.card_generic_simple_item)
         val txtText: TextView = view.findViewById(R.id.txt_text_generic_simple_item)
-        val materialButtonTogleGroup: MaterialButtonToggleGroup = view.findViewById(R.id.mbtg_generic_simple_item)
-        val btnIcon: MaterialButton = view.findViewById(R.id.btn_icon_generic_simple_item)
+        val checkBox : CheckBox = view.findViewById(R.id.checkbox_generic_simple_item)
     }
 }
