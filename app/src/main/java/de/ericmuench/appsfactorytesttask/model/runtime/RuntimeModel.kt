@@ -25,6 +25,7 @@ data class Song(
 data class LastFmArtistSearchResults(
     val totalResults : Int,
     val startPage : Int,
+    val startIndex : Int,
     val itemsPerPage : Int,
     val items: List<Artist>
 )

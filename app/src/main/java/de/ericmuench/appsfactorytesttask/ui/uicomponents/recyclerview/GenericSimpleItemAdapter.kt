@@ -91,6 +91,21 @@ class GenericSimpleItemAdapter<T>(
         return success
     }
 
+    /**
+     * This function clears the elements of the adapter.
+     * @return Whether the clear-Operation was successful
+     */
+    fun clearElements() : Boolean{
+        if(data.isEmpty()){
+            return false
+        }
+
+        val oldLastIndex = data.lastIndex
+        data.clear()
+        notifyItemRangeRemoved(0,oldLastIndex)
+        return true
+    }
+
 
     //ViewHolder Class
     class GenericSimpleItemViewHolder(view: View) : RecyclerView.ViewHolder(view){

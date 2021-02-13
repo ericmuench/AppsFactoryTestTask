@@ -17,6 +17,7 @@ class ApiModelToRuntimeMapper {
         : LastFmArtistSearchResults = with(apiSearchRes.artistResults){
         return@with LastFmArtistSearchResults(
             opensearchTotalResults.toInt(),
+            opensearchQuery.startPage.toInt(),
             opensearchStartIndex.toInt(),
             opensearchItemsPerPage.toInt(),
             mapSearchedArtists(artistmatches.searchedArtist).toList()

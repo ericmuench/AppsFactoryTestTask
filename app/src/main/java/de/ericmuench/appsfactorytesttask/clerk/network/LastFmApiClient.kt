@@ -36,7 +36,7 @@ class LastFmApiClient {
 
 
     //functions
-    suspend fun searchArtists(searchQuery: String, startPage: Int = 1, elementsPerPage: Int = 10)
+    suspend fun searchArtists(searchQuery: String, startPage: Int , elementsPerPage: Int)
         : Result<LastFmArtistSearchResults,Exception> = coroutineScope {
         val url = LAST_FM_API_BASE_URL +
                 "?method=artist.search" +
@@ -96,10 +96,5 @@ class LastFmApiClient {
 
             return@flatMap Result.error(NullPointerException("some unknown json was delivered by Api"))
         }
-    }
-
-    private sealed class LastFmResult {
-        data class ApiData<T>(val data : T) : LastFmResult()
-        data class ApiError<Err>(val data : Err) : LastFmResult()
     }
 }

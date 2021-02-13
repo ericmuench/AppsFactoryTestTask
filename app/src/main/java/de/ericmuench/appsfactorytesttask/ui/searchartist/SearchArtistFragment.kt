@@ -5,6 +5,7 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.ericmuench.appsfactorytesttask.R
@@ -13,6 +14,7 @@ import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.util.extensions.*
 import de.ericmuench.appsfactorytesttask.viewmodel.SearchArtistViewModel
+import kotlinx.coroutines.launch
 
 /**
  * A simple [Fragment] subclass, which is responsible for the search of an artist.
@@ -37,6 +39,7 @@ class SearchArtistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
+        setupViewModel()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -44,19 +47,22 @@ class SearchArtistFragment : Fragment() {
 
         menu.findItem(R.id.search_artist_acbar_item_searchbar).actionView.castedAs<SearchView> { searchView ->
             searchView.removeSearchPlate()
-            searchView.setOnQueryTextListener(object: SearchView.OnQueryTextListener{
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     query.notNull {
                         hideKeyboard()
                         println("Submit Text: $it")
-                        viewModel.submitArtistSearchQuery(it)
+                        viewModel.searchQuery = it
+                        viewModel.submitArtistSearchQuery {
+                            //TODO: do UI stuff with error message
+                            it.printStackTrace()
+                        }
                     }
                     return false
                 }
 
                 override fun onQueryTextChange(newText: String?): Boolean {
                     println("Text changed : $newText")
-                    //TODO: Sync search Text with VM
                     return false
                 }
             })
@@ -79,13 +85,37 @@ class SearchArtistFragment : Fragment() {
                     holder.checkBox.setOnCheckedChangeListener { box, checked ->
                         println("value of $str is now $checked")
                     }*/
-
+                    holder.checkBox.visibility = View.INVISIBLE
                     holder.cardView.setOnClickListener {
                         println("${artist.artistName} was clicked")
                         //TODO: Open detail page for artist (top album overview)
                     }
                 }
             recyclerviewSearchArtist.adapter = recyclerViewAdapter
+        }
+    }
+
+    //help functions for Viewmodel setup
+    private fun setupViewModel() = with(viewModel){
+        this.searchedArtistsResultChunks.observe(viewLifecycleOwner) { vmSearchData ->
+            lifecycleScope.launch {
+                val recAdapter = recyclerViewAdapter
+                if(vmSearchData != null && recAdapter != null){
+                    val allArtists = vmSearchData.map { it.items }.flatten()
+
+                    if(recAdapter.itemCount < allArtists.size){
+                        allArtists.forEach {
+                            println("Artist: ${it.artistName}")
+                        }
+                        recAdapter.addElements(allArtists.subList(recAdapter.itemCount,allArtists.size))
+                    }
+                    else if(recAdapter.itemCount > allArtists.size){
+                        recAdapter.clearElements()
+                        recAdapter.addElements(allArtists)
+                    }
+                }
+            }
+
         }
     }
 }
