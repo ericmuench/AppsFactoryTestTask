@@ -19,11 +19,13 @@ android {
     buildTypes {
         debug{
             buildConfigField 'String', "LastFMApiKey", AF_TESTTASK_LASTFM_API_KEY
+            buildConfigField 'String', "LastFMUserAgent", AF_TESTTASK_LASTFM_USER_AGENT
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField 'String', "LastFMApiKey", AF_TESTTASK_LASTFM_API_KEY
+            buildConfigField 'String', "LastFMUserAgent", AF_TESTTASK_LASTFM_USER_AGENT
         }
     }
     compileOptions {
@@ -58,7 +60,6 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-
     //navigation
     def nav_version = "2.3.3"
 
@@ -67,6 +68,15 @@ dependencies {
 
     // Feature module Support for navigation
     implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_version"
+
+
+    //fuel for web requests
+    implementation 'com.github.kittinunf.fuel:fuel:2.3.1'
+    implementation 'com.github.kittinunf.fuel:fuel-gson:2.3.1'
+
+    //gson
+    implementation 'com.google.code.gson:gson:2.8.6'
+    //implementation "com.squareup.moshi:moshi:1.11.0"
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
