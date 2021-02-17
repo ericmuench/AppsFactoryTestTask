@@ -29,6 +29,7 @@ class SearchArtistFragment : Fragment() {
     private val viewModel : SearchArtistViewModel by viewModels()
 
     private var recyclerViewAdapter : GenericSimpleItemAdapter<Artist>? = null
+    private var searchViewItem : SearchView? = null
 
     //lifecycle functions
     override fun onCreateView(
@@ -48,31 +49,24 @@ class SearchArtistFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.search_artist_actionbar_menu,menu)
 
-        menu.findItem(R.id.search_artist_acbar_item_searchbar).actionView.castedAs<SearchView> { searchView ->
-            searchView.removeSearchPlate()
-            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean {
-                    query.notNull { queryNN ->
-                        hideKeyboard()
-                        println("Submit Text: $queryNN")
-                        viewModel.searchQuery = queryNN
-                        viewModel.submitArtistSearchQuery { onHandleError(it) }
-                    }
-                    return false
-                }
+        //SearchView
+        val menuItem = menu.findItem(R.id.search_artist_acbar_item_searchbar)
+        setupSearchView(menuItem)
 
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    println("Text changed : $newText")
-                    return false
-                }
-            })
-
-        }
     }
 
     override fun onStop() {
         super.onStop()
         viewBinding.recyclerviewSearchArtist.clearOnScrollListeners()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        /*clear text change listener to remove SearchView-Bug that Text is not restored after
+        * after rotation change
+        * */
+        searchViewItem?.setOnQueryTextFocusChangeListener(null)
+
     }
 
     //help functions for Layout setup
@@ -105,6 +99,50 @@ class SearchArtistFragment : Fragment() {
             }
             recyclerviewSearchArtist.addOnScrollListener(positionDetector)
         }
+    }
+
+    //TODO: Doc
+    private fun setupSearchView(menuItem : MenuItem?){
+
+        val isSearching = viewModel.isSearching.value ?: false
+        if(isSearching){
+            menuItem?.expandActionView()
+        }
+
+        searchViewItem = menuItem?.actionView as? SearchView
+        menuItem?.actionView.castedAs<SearchView> { searchView ->
+            searchView.removeSearchPlate()
+            searchView.setQuery(viewModel.searchQuery.value ?: "",false)
+            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    query.notNull { queryNN ->
+                        hideKeyboard()
+                        println("Submit Text: $queryNN")
+                        viewModel.searchQuery.value = queryNN
+                        viewModel.submitArtistSearchQuery { onHandleError(it) }
+                    }
+                    return false
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    viewModel.searchQuery.value = newText
+                    return false
+                }
+            })
+        }
+
+
+        menuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener{
+            override fun onMenuItemActionExpand(p0: MenuItem?): Boolean {
+                viewModel.isSearching.value = true
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean {
+                viewModel.isSearching.value = false
+                return true
+            }
+        })
     }
 
     //help functions for Viewmodel setup

@@ -20,6 +20,9 @@ import kotlinx.coroutines.launch
  */
 class SearchArtistViewModel : ViewModel() {
 
+    init {
+        println("Init of SearchArtistVM")
+    }
     //LiveData
     /**The following fields represent the list of Artists as a Search-Result*/
     private val _searchedArtistsResultChunks = MutableLiveData<List<ArtistSearchResults>>(emptyList())
@@ -31,8 +34,16 @@ class SearchArtistViewModel : ViewModel() {
     val loadingState : LiveData<LoadingState>
     get() = _loadingState
 
+    /**The following field holds the current search-query*/
+    val searchQuery = MutableLiveData("")
+
+    /**The following field indicates whether the search-mode is currently activated or not*/
+    val isSearching = MutableLiveData(false)
+
+
     //fields
-    var searchQuery : String = ""
+    //var searchQuery : String = ""
+    //var isSearching : Boolean = false
     val allArtists : List<Artist>
     get() = searchedArtistsResultChunks.value
             ?.map { it.items }
@@ -75,7 +86,7 @@ class SearchArtistViewModel : ViewModel() {
      *
      */
     private suspend fun loadData(onError : (Throwable) -> Unit = {}, startPage : Int) = coroutineScope{
-        val repoResponse = DataRepository.searchForArtists(searchQuery,startPage)
+        val repoResponse = DataRepository.searchForArtists(searchQuery.value ?: "",startPage)
         when(repoResponse){
             is DataRepositoryResponse.Data<ArtistSearchResults> ->{
                 if(repoResponse.value.items.isNotEmpty()){

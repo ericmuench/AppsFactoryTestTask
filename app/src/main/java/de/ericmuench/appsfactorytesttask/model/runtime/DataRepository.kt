@@ -19,6 +19,11 @@ object DataRepository {
 
     //TODO: Add further fields for room and runtime cache
 
+    //fields
+    /**This field caches the current Search-Query results*/
+    //TODO: Add cache for searchquerys for artists
+
+
     //functions
     suspend fun searchForArtists(
         searchQuery : String,

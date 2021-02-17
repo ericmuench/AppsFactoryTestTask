@@ -42,7 +42,7 @@ class RecyclerViewPositionDetector : RecyclerView.OnScrollListener() {
      * scrolling or not)
      * @param adapter The Adapter of the Recyclerview (get access to how much data is currently stored)
      *
-     * @return Whether the endof the RecyclerView is reached and the RecyclerView does not scroll
+     * @return Whether the endof the RecyclerView is reached
      */
     private fun isEndPosition(
             layoutManager: LinearLayoutManager,
@@ -50,7 +50,6 @@ class RecyclerViewPositionDetector : RecyclerView.OnScrollListener() {
             adapter: RecyclerView.Adapter<RecyclerView.ViewHolder>
     ) : Boolean{
         val adapterLastIndex = adapter.lastItemIndex().takeIf { it >= 0 } ?: return false
-        return layoutManager.findLastCompletelyVisibleItemPosition() == adapterLastIndex &&
-                scrollState == RecyclerView.SCROLL_STATE_IDLE
+        return layoutManager.findLastCompletelyVisibleItemPosition() == adapterLastIndex
     }
 }
