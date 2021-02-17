@@ -12,6 +12,7 @@ import de.ericmuench.appsfactorytesttask.model.runtime.DataRepositoryResponse
 import de.ericmuench.appsfactorytesttask.model.runtime.LastFmArtistSearchResults
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.util.extensions.notNullSuspending
+import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -22,12 +23,15 @@ import kotlinx.coroutines.launch
 class SearchArtistViewModel : ViewModel() {
 
     //LiveData
-    /**
-     * The following field represent the list of Artists as a Search-Result
-     */
+    /**The following fields represent the list of Artists as a Search-Result*/
     private val _searchedArtistsResultChunks = MutableLiveData<List<LastFmArtistSearchResults>>(emptyList())
     val searchedArtistsResultChunks : LiveData<List<LastFmArtistSearchResults>>
     get() = _searchedArtistsResultChunks
+
+    /**The following field take care of the loading state*/
+    private val _loadingState = MutableLiveData(LoadingState.IDLE)
+    val loadingState : LiveData<LoadingState>
+    get() = _loadingState
 
     //fields
     var searchQuery : String = ""
@@ -36,15 +40,21 @@ class SearchArtistViewModel : ViewModel() {
     fun submitArtistSearchQuery(
         onError : (Throwable) -> Unit = {}
     ) = viewModelScope.launch{
+        _loadingState.value = LoadingState.LOADING
         clearViewModelData()
-        loadData(onError,1)
+        val job = launch { loadData(onError,1) }
+        job.join()
+        _loadingState.value = LoadingState.IDLE
     }
 
     fun loadMoreSearchData(onError : (Throwable) -> Unit = {}) = viewModelScope.launch{
         _searchedArtistsResultChunks.value.notNullSuspending { currentResults ->
             if(currentResults.isNotEmpty()){
+                _loadingState.value = LoadingState.RELOADING
                 val page = currentResults.last().startPage + 1
-                loadData(onError,page)
+                val job = launch { loadData(onError,page) }
+                job.join()
+                _loadingState.value = LoadingState.IDLE
             }
         }
     }
@@ -64,7 +74,6 @@ class SearchArtistViewModel : ViewModel() {
     private suspend fun loadData(onError : (Throwable) -> Unit = {}, startPage : Int){
         val repoResponse = DataRepository.searchForArtists(searchQuery,startPage)
         when(repoResponse){
-
             is DataRepositoryResponse.Data<LastFmArtistSearchResults> ->{
                 if(repoResponse.value.items.isNotEmpty()){
                     _searchedArtistsResultChunks.value =

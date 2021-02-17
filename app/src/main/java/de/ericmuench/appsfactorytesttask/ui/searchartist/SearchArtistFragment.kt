@@ -1,7 +1,9 @@
 package de.ericmuench.appsfactorytesttask.ui.searchartist
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
@@ -13,6 +15,7 @@ import de.ericmuench.appsfactorytesttask.databinding.FragmentSearchArtistBinding
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.util.extensions.*
+import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.SearchArtistViewModel
 import kotlinx.coroutines.launch
 
@@ -49,12 +52,25 @@ class SearchArtistFragment : Fragment() {
             searchView.removeSearchPlate()
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
-                    query.notNull {
+                    query.notNull { queryNN ->
                         hideKeyboard()
-                        println("Submit Text: $it")
-                        viewModel.searchQuery = it
+                        println("Submit Text: $queryNN")
+                        viewModel.searchQuery = queryNN
                         viewModel.submitArtistSearchQuery {
-                            //TODO: do UI stuff with error message
+                            activity.notNull { act ->
+                                val errorMsg = resources
+                                        .getString(R.string.error_template_try_again)
+                                        .replace("#","\n\n${it.localizedMessage}\n\n")
+
+                                AlertDialog.Builder(act)
+                                        .setTitle(R.string.error)
+                                        .setMessage(errorMsg)
+                                        .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
+                                            dialogInterface.dismiss()
+                                        }
+                                        .create()
+                                        .show()
+                            }
                             it.printStackTrace()
                         }
                     }
@@ -97,7 +113,8 @@ class SearchArtistFragment : Fragment() {
 
     //help functions for Viewmodel setup
     private fun setupViewModel() = with(viewModel){
-        this.searchedArtistsResultChunks.observe(viewLifecycleOwner) { vmSearchData ->
+        //observer for search results
+        searchedArtistsResultChunks.observe(viewLifecycleOwner) { vmSearchData ->
             lifecycleScope.launch {
                 val recAdapter = recyclerViewAdapter
                 if(vmSearchData != null && recAdapter != null){
@@ -115,7 +132,28 @@ class SearchArtistFragment : Fragment() {
                     }
                 }
             }
-
         }
+
+        //observe loadingstate
+        loadingState.observe(viewLifecycleOwner){ vmLoadState ->
+            vmLoadState.notNull { loading ->
+                when(loading){
+                   LoadingState.IDLE -> {
+                       viewBinding.progressTopSearchArtist.hide()
+                       viewBinding.progressBottomSearchArtist.hide()
+                   }
+                   LoadingState.LOADING -> {
+                       viewBinding.progressTopSearchArtist.show()
+                       viewBinding.progressBottomSearchArtist.hide()
+                   }
+                   LoadingState.RELOADING -> {
+                       viewBinding.progressTopSearchArtist.hide()
+                       viewBinding.progressBottomSearchArtist.show()
+                   }
+                }
+            }
+        }
+
+
     }
 }

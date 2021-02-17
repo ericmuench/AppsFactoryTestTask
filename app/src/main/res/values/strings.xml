@@ -4,4 +4,6 @@
     <string name="search">Search</string>
     <string name="search_artists">Search Artists</string>
     <string name="search_artists_hint">Search for an artist…</string>
+    <string name="error">Error</string>
+    <string name="error_template_try_again">An Error occurred:#Please try again!</string>
 </resources>

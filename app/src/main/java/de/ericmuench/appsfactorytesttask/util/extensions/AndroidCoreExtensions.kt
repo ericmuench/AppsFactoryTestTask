@@ -65,7 +65,6 @@ fun Activity.hideKeyboard(){
  */
 fun Fragment.hideKeyboard() = activity?.hideKeyboard()
 
-
 //Concrete UI Components Extensions
 /**
  * This extension function makes the small line at the Bottom of the Edit-Text-Field of
