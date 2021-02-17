@@ -4,17 +4,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.kittinunf.result.Result
-import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.DataRepository
 import de.ericmuench.appsfactorytesttask.model.runtime.DataRepositoryResponse
-import de.ericmuench.appsfactorytesttask.model.runtime.LastFmArtistSearchResults
-import de.ericmuench.appsfactorytesttask.util.extensions.notNull
+import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResults
 import de.ericmuench.appsfactorytesttask.util.extensions.notNullSuspending
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 /**
@@ -24,8 +22,8 @@ class SearchArtistViewModel : ViewModel() {
 
     //LiveData
     /**The following fields represent the list of Artists as a Search-Result*/
-    private val _searchedArtistsResultChunks = MutableLiveData<List<LastFmArtistSearchResults>>(emptyList())
-    val searchedArtistsResultChunks : LiveData<List<LastFmArtistSearchResults>>
+    private val _searchedArtistsResultChunks = MutableLiveData<List<ArtistSearchResults>>(emptyList())
+    val searchedArtistsResultChunks : LiveData<List<ArtistSearchResults>>
     get() = _searchedArtistsResultChunks
 
     /**The following field take care of the loading state*/
@@ -35,6 +33,11 @@ class SearchArtistViewModel : ViewModel() {
 
     //fields
     var searchQuery : String = ""
+    val allArtists : List<Artist>
+    get() = searchedArtistsResultChunks.value
+            ?.map { it.items }
+            ?.flatten()
+            ?: emptyList()
 
     //functions
     fun submitArtistSearchQuery(
@@ -71,16 +74,30 @@ class SearchArtistViewModel : ViewModel() {
      * @param startPage The Page to start the search
      *
      */
-    private suspend fun loadData(onError : (Throwable) -> Unit = {}, startPage : Int){
+    private suspend fun loadData(onError : (Throwable) -> Unit = {}, startPage : Int) = coroutineScope{
         val repoResponse = DataRepository.searchForArtists(searchQuery,startPage)
         when(repoResponse){
-            is DataRepositoryResponse.Data<LastFmArtistSearchResults> ->{
+            is DataRepositoryResponse.Data<ArtistSearchResults> ->{
                 if(repoResponse.value.items.isNotEmpty()){
-                    _searchedArtistsResultChunks.value =
-                        _searchedArtistsResultChunks
-                            .value
-                            ?.toMutableList()
-                            ?.apply { add(repoResponse.value) }
+                    val newChunksDef = async(Dispatchers.IO) {
+                        val distinctArtists = repoResponse.value.items
+                                .filter { artist ->
+                                    !allArtists.contains(artist)
+                                }
+                        val distinctSearchResults = ArtistSearchResults(
+                                repoResponse.value.totalResults,
+                                repoResponse.value.startPage,
+                                repoResponse.value.startIndex,
+                                distinctArtists.size,
+                                distinctArtists
+                        )
+                        _searchedArtistsResultChunks.value
+                                ?.toMutableList()
+                                ?.apply {
+                                    add(distinctSearchResults)
+                                }
+                    }
+                    _searchedArtistsResultChunks.value = newChunksDef.await()
                 }
             }
             is DataRepositoryResponse.Error -> onError(repoResponse.error)

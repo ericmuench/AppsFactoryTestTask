@@ -1,6 +1,5 @@
 package de.ericmuench.appsfactorytesttask.ui.searchartist
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AlertDialog
@@ -14,6 +13,7 @@ import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.databinding.FragmentSearchArtistBinding
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.RecyclerViewPositionDetector
 import de.ericmuench.appsfactorytesttask.util.extensions.*
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.SearchArtistViewModel
@@ -56,23 +56,7 @@ class SearchArtistFragment : Fragment() {
                         hideKeyboard()
                         println("Submit Text: $queryNN")
                         viewModel.searchQuery = queryNN
-                        viewModel.submitArtistSearchQuery {
-                            activity.notNull { act ->
-                                val errorMsg = resources
-                                        .getString(R.string.error_template_try_again)
-                                        .replace("#","\n\n${it.localizedMessage}\n\n")
-
-                                AlertDialog.Builder(act)
-                                        .setTitle(R.string.error)
-                                        .setMessage(errorMsg)
-                                        .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
-                                            dialogInterface.dismiss()
-                                        }
-                                        .create()
-                                        .show()
-                            }
-                            it.printStackTrace()
-                        }
+                        viewModel.submitArtistSearchQuery { onHandleError(it) }
                     }
                     return false
                 }
@@ -86,6 +70,11 @@ class SearchArtistFragment : Fragment() {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        viewBinding.recyclerviewSearchArtist.clearOnScrollListeners()
+    }
+
     //help functions for Layout setup
     /**
      * This function sets up all components that are related to the recyclerview of this Fragment
@@ -95,7 +84,7 @@ class SearchArtistFragment : Fragment() {
         activity.notNull { act ->
             recyclerviewSearchArtist.layoutManager = if(act.runsInLandscape()) GridLayoutManager(act,2) else LinearLayoutManager(act)
             recyclerViewAdapter = GenericSimpleItemAdapter(act, emptyList<Artist>())
-                .onApplyDataToViewHolder { holder, artist, pos ->
+                .onApplyDataToViewHolder { holder, artist, _ ->
                     holder.txtText.text = artist.artistName
                     /*holder.checkBox.setButtonDrawable(R.drawable.item_stored_selector)
                     holder.checkBox.setOnCheckedChangeListener { box, checked ->
@@ -108,6 +97,13 @@ class SearchArtistFragment : Fragment() {
                     }
                 }
             recyclerviewSearchArtist.adapter = recyclerViewAdapter
+
+            val positionDetector = RecyclerViewPositionDetector().apply {
+                onEndReached = {
+                    viewModel.loadMoreSearchData { onHandleError(it) }
+                }
+            }
+            recyclerviewSearchArtist.addOnScrollListener(positionDetector)
         }
     }
 
@@ -118,17 +114,22 @@ class SearchArtistFragment : Fragment() {
             lifecycleScope.launch {
                 val recAdapter = recyclerViewAdapter
                 if(vmSearchData != null && recAdapter != null){
-                    val allArtists = vmSearchData.map { it.items }.flatten()
+                    val allArtists = viewModel.allArtists
 
-                    if(recAdapter.itemCount < allArtists.size){
-                        allArtists.forEach {
-                            println("Artist: ${it.artistName}")
+                    when {
+                        allArtists.isEmpty() -> {
+                            recAdapter.clearElements()
                         }
-                        recAdapter.addElements(allArtists.subList(recAdapter.itemCount,allArtists.size))
-                    }
-                    else if(recAdapter.itemCount > allArtists.size){
-                        recAdapter.clearElements()
-                        recAdapter.addElements(allArtists)
+                        recAdapter.itemCount < allArtists.size -> {
+                            allArtists.forEach {
+                                println("Artist: ${it.artistName}")
+                            }
+                            recAdapter.addElements(allArtists.subList(recAdapter.itemCount,allArtists.size))
+                        }
+                        recAdapter.itemCount > allArtists.size -> {
+                            recAdapter.clearElements()
+                            recAdapter.addElements(allArtists)
+                        }
                     }
                 }
             }
@@ -153,7 +154,29 @@ class SearchArtistFragment : Fragment() {
                 }
             }
         }
+    }
 
+    //help functions for error handling
+    /**
+     * This function handles an Error by showing Feedback in the UI for the User
+     *
+     * @param error A Throwable-Object which usually contains an Exception
+     * */
+     private fun onHandleError(error: Throwable){
+        activity.notNull { act ->
+            val errorMsg = resources
+                    .getString(R.string.error_template_try_again)
+                    .replace("#","\n\n${error.localizedMessage}\n\n")
 
+            AlertDialog.Builder(act)
+                    .setTitle(R.string.error)
+                    .setMessage(errorMsg)
+                    .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
+                        dialogInterface.dismiss()
+                    }
+                    .create()
+                    .show()
+        }
+        error.printStackTrace()
     }
 }

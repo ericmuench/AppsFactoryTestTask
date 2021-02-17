@@ -11,7 +11,7 @@ import de.ericmuench.appsfactorytesttask.clerk.mapper.ApiModelToRuntimeMapper
 import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.ArtistSearchResultFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.error.ErrorFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.error.ExtendedErrorFromLastFm
-import de.ericmuench.appsfactorytesttask.model.runtime.LastFmArtistSearchResults
+import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResults
 import de.ericmuench.appsfactorytesttask.util.formatter.UrlParameterFormatter
 import de.ericmuench.appsfactorytesttask.util.json.GsonPropertyChecker
 import kotlinx.coroutines.coroutineScope
@@ -37,7 +37,7 @@ class LastFmApiClient {
 
     //functions
     suspend fun searchArtists(searchQuery: String, startPage: Int , elementsPerPage: Int)
-        : Result<LastFmArtistSearchResults,Exception> = coroutineScope {
+        : Result<ArtistSearchResults,Exception> = coroutineScope {
         val url = LAST_FM_API_BASE_URL +
                 "?method=artist.search" +
                 "&api_key=${BuildConfig.LastFMApiKey}" +

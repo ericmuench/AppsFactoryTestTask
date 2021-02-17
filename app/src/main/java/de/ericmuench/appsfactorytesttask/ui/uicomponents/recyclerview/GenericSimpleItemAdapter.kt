@@ -83,6 +83,9 @@ class GenericSimpleItemAdapter<T>(
      * @return Whether the add-operation was successful or not
      */
     fun addElements(elements : Collection<T>) : Boolean{
+        if(elements.isEmpty()){
+            return false
+        }
         val oldLastIndex = data.lastIndex
         val success = data.addAll(elements)
         if(success){
@@ -90,6 +93,7 @@ class GenericSimpleItemAdapter<T>(
         }
         return success
     }
+
 
     /**
      * This function clears the elements of the adapter.
@@ -100,9 +104,8 @@ class GenericSimpleItemAdapter<T>(
             return false
         }
 
-        val oldLastIndex = data.lastIndex
         data.clear()
-        notifyItemRangeRemoved(0,oldLastIndex)
+        notifyDataSetChanged()
         return true
     }
 

@@ -6,7 +6,15 @@ data class Artist(
     var description : String,
     val onlineUrl : String?,
     val albums : List<Album>
-)
+){
+    override fun equals(other: Any?): Boolean {
+        if(other == null || other !is Artist){
+            return false
+        }
+
+        return this.mbid == other.mbid && this.artistName == other.artistName
+    }
+}
 
 data class Album(
     val title : String,
@@ -22,7 +30,7 @@ data class Song(
     val onlineUrl: String?
 )
 
-data class LastFmArtistSearchResults(
+data class ArtistSearchResults(
     val totalResults : Int,
     val startPage : Int,
     val startIndex : Int,

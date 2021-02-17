@@ -9,6 +9,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
 import kotlin.reflect.KClass
 
 /**
@@ -75,3 +76,8 @@ fun SearchView.removeSearchPlate() {
     searchPlate.setBackgroundColor(ContextCompat.getColor(context,android.R.color.transparent))
 }
 
+/**
+ * This function calculates the last possible index for an element in the datasource of an
+ * adapter of a RecyclerView.
+ * */
+fun <VH : RecyclerView.ViewHolder> RecyclerView.Adapter<VH>.lastItemIndex() : Int = itemCount - 1

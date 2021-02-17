@@ -24,7 +24,7 @@ object DataRepository {
         searchQuery : String,
         startPage : Int = 1,
         limitPerPage : Int = 10
-    ) : DataRepositoryResponse<LastFmArtistSearchResults,Throwable> = coroutineScope{
+    ) : DataRepositoryResponse<ArtistSearchResults,Throwable> = coroutineScope{
         val resultDeferred = async(Dispatchers.IO) {
             apiClient.searchArtists(searchQuery,startPage,limitPerPage)
         }
