@@ -11,11 +11,8 @@ import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.notNullSuspending
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import java.io.IOException
 
 /**
  * This class defines a ViewModel for the View that is responsible for searching artists
@@ -64,7 +61,7 @@ class SearchArtistViewModel : ViewModel() {
         onError : (Throwable) -> Unit = {}
     ) = viewModelScope.launch{
         _loadingState.value = LoadingState.LOADING
-        clearViewModelData()
+        clearArtistSearchData()
         val job = launch { loadData(connectivityChecker,onError,1) }
         job.join()
         _loadingState.value = LoadingState.IDLE
@@ -94,11 +91,13 @@ class SearchArtistViewModel : ViewModel() {
     }
 
 
-    //help functions
-    private fun clearViewModelData(){
+    fun clearArtistSearchData(){
         _searchedArtistsResultChunks.value = emptyList()
     }
 
+    fun hasSearchResults() : Boolean = allArtists.isNotEmpty()
+
+    //help functions
     /**
      * This function is responsible for the data-load-Operation from the DataRepository. After all
      * data was loaded it should be applied to the LiveData-Fields or OnError should be invoked

@@ -6,7 +6,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,7 +19,6 @@ import de.ericmuench.appsfactorytesttask.util.extensions.*
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.SearchArtistViewModel
 import kotlinx.coroutines.launch
-import java.io.IOException
 
 /**
  * A simple [Fragment] subclass, which is responsible for the search of an artist.
@@ -39,7 +37,6 @@ class SearchArtistFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View{
         setHasOptionsMenu(true)
-        println("Last Search Text in Oncreate was: ${viewModel.artistSearchQuery}")
         viewBinding = FragmentSearchArtistBinding.inflate(inflater)
         return viewBinding.root
     }
@@ -56,9 +53,17 @@ class SearchArtistFragment : Fragment() {
         //SearchView
         val menuItem = menu.findItem(R.id.search_artist_acbar_item_searchbar)
         setupSearchView(menuItem)
-
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            R.id.search_artist_acbar_item_clear_items -> {
+                requestSearchResultsClear()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
     override fun onStop() {
         super.onStop()
@@ -97,7 +102,7 @@ class SearchArtistFragment : Fragment() {
         }
     }
 
-    //TODO: Doc
+    /**This function sets up all UI Components associated with the SearchView*/
     private fun setupSearchView(menuItem : MenuItem?){
 
         val isSearching = viewModel.isSearchingArtist
@@ -221,5 +226,30 @@ class SearchArtistFragment : Fragment() {
                     .show()
         }
         error.printStackTrace()
+    }
+
+    //further help functions
+    /**
+     * This function should ask the user if he/she wants to delete the results of the search and
+     * do so if that's the case.
+     * */
+    private fun requestSearchResultsClear(){
+        val con = context
+        if(viewModel.hasSearchResults() && con != null){
+            AlertDialog.Builder(con)
+                    .setTitle(R.string.warning)
+                    .setPositiveButton(android.R.string.yes){ dialog, _ ->
+                        searchViewItem?.setQuery("",false)
+                        viewModel.artistSearchQuery = ""
+                        viewModel.clearArtistSearchData()
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton(android.R.string.no){ dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .setMessage(R.string.question_sure_clear_all_artist_search_results)
+                    .create()
+                    .show()
+        }
     }
 }

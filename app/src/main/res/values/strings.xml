@@ -5,5 +5,8 @@
     <string name="search_artists">Search Artists</string>
     <string name="search_artists_hint">Search for an artist…</string>
     <string name="error">Error</string>
+    <string name="warning">Warning</string>
     <string name="error_template_try_again">An Error occurred:#Please try again!</string>
+    <string name="clear_search_results">Clear Search Results</string>
+    <string name="question_sure_clear_all_artist_search_results">Would you really like to delete all Artist-Search-Results?</string>
 </resources>
