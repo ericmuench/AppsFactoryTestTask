@@ -11,11 +11,11 @@ import de.ericmuench.appsfactorytesttask.clerk.mapper.ApiModelToRuntimeMapper
 import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.ArtistSearchResultFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.error.ErrorFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.error.ExtendedErrorFromLastFm
-import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResults
+import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 import de.ericmuench.appsfactorytesttask.util.formatter.UrlParameterFormatter
 import de.ericmuench.appsfactorytesttask.util.json.GsonPropertyChecker
 import kotlinx.coroutines.coroutineScope
-import java.lang.NullPointerException
+
 
 /**
  * This class is responsible for all API-Calls to LastFm-API
@@ -36,8 +36,8 @@ class LastFmApiClient {
 
 
     //functions
-    suspend fun searchArtists(searchQuery: String, startPage: Int , elementsPerPage: Int)
-        : Result<ArtistSearchResults,Exception> = coroutineScope {
+    suspend fun searchArtists(searchQuery: String, startPage: Int, elementsPerPage: Int)
+        : Result<ArtistSearchResult, Exception> = coroutineScope {
         val url = LAST_FM_API_BASE_URL +
                 "?method=artist.search" +
                 "&api_key=${BuildConfig.LastFMApiKey}" +
@@ -47,7 +47,7 @@ class LastFmApiClient {
                 "&format=json"
 
         return@coroutineScope try{
-            getResultFromApi<ArtistSearchResultFromLastFm,ExtendedErrorFromLastFm>(url)
+            getResultFromApi<ArtistSearchResultFromLastFm, ExtendedErrorFromLastFm>(url)
                 .flatMap {
                     try {
                         val mapped = dataMapper.mapArtistSearchResults(it)
@@ -67,28 +67,25 @@ class LastFmApiClient {
     //help functions
     //generic data fetch function
     private suspend inline fun <reified ApiDataType : Any, reified ApiErrorType : ErrorFromLastFm> getResultFromApi(
-        url: String
-    ): Result<ApiDataType,Exception> = coroutineScope{
-        val (_, response , result) = Fuel
-            .get(url)
-            .header(Headers.USER_AGENT,BuildConfig.LastFMUserAgent)
-            .responseString()
+            url: String
+    ): Result<ApiDataType, Exception> = coroutineScope{
+        val (_, _, result) = Fuel
+                .get(url)
+                .header(Headers.USER_AGENT, BuildConfig.LastFMUserAgent)
+                .responseString()
 
         val json = result.get()
-        //TODO: remove println
-        println("result is:\n$result")
-        println("body is $json")
         return@coroutineScope result.flatMap {
 
-            if(jsonPropCheck.jsonObjectContainsAllPropertiesOf(ApiDataType::class,json)){
-                val data = gson.fromJson<ApiDataType>(json, object: TypeToken<ApiDataType>(){}.type)
+            if(jsonPropCheck.jsonObjectContainsAllPropertiesOf(ApiDataType::class, json)){
+                val data = gson.fromJson<ApiDataType>(json, object : TypeToken<ApiDataType>() {}.type)
                 if(data != null){
                     return@flatMap Result.success(data)
                 }
             }
 
-            if(jsonPropCheck.jsonObjectContainsAllPropertiesOf(ApiErrorType::class,json)){
-                val err = gson.fromJson<ApiErrorType>(json, object: TypeToken<ApiErrorType>(){}.type)
+            if(jsonPropCheck.jsonObjectContainsAllPropertiesOf(ApiErrorType::class, json)){
+                val err = gson.fromJson<ApiErrorType>(json, object : TypeToken<ApiErrorType>() {}.type)
                 if(err != null){
                     return@flatMap Result.error(dataMapper.mapError(err))
                 }
@@ -97,4 +94,5 @@ class LastFmApiClient {
             return@flatMap Result.error(NullPointerException("some unknown json was delivered by Api"))
         }
     }
+
 }

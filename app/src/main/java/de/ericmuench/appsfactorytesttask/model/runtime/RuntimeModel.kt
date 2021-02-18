@@ -30,7 +30,7 @@ data class Song(
     val onlineUrl: String?
 )
 
-data class ArtistSearchResults(
+data class ArtistSearchResult(
     val totalResults : Int,
     val startPage : Int,
     val startIndex : Int,

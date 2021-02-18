@@ -7,26 +7,25 @@ import androidx.lifecycle.viewModelScope
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.DataRepository
 import de.ericmuench.appsfactorytesttask.model.runtime.DataRepositoryResponse
-import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResults
+import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
+import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.notNullSuspending
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 /**
  * This class defines a ViewModel for the View that is responsible for searching artists
  */
 class SearchArtistViewModel : ViewModel() {
 
-    init {
-        println("Init of SearchArtistVM")
-    }
     //LiveData
     /**The following fields represent the list of Artists as a Search-Result*/
-    private val _searchedArtistsResultChunks = MutableLiveData<List<ArtistSearchResults>>(emptyList())
-    val searchedArtistsResultChunks : LiveData<List<ArtistSearchResults>>
+    private val _searchedArtistsResultChunks = MutableLiveData<List<ArtistSearchResult>>(emptyList())
+    val searchedArtistsResultChunks : LiveData<List<ArtistSearchResult>>
     get() = _searchedArtistsResultChunks
 
     /**The following field take care of the loading state*/
@@ -34,16 +33,25 @@ class SearchArtistViewModel : ViewModel() {
     val loadingState : LiveData<LoadingState>
     get() = _loadingState
 
-    /**The following field holds the current search-query*/
-    val searchQuery = MutableLiveData("")
-
-    /**The following field indicates whether the search-mode is currently activated or not*/
-    val isSearching = MutableLiveData(false)
-
-
     //fields
-    //var searchQuery : String = ""
-    //var isSearching : Boolean = false
+    var isSearchingArtist : Boolean
+        get() = DataRepository.isSearchingArtist
+        set(value) {
+            DataRepository.isSearchingArtist = value
+        }
+
+    var artistSearchQuery : String
+        get() = DataRepository.artistSearchQuery
+        set(value) {
+            DataRepository.artistSearchQuery = value
+        }
+
+    var pendingArtistSearchQuery : String
+        get() = DataRepository.pendingArtistSearchQuery
+        set(value) {
+            DataRepository.pendingArtistSearchQuery = value
+        }
+
     val allArtists : List<Artist>
     get() = searchedArtistsResultChunks.value
             ?.map { it.items }
@@ -52,26 +60,39 @@ class SearchArtistViewModel : ViewModel() {
 
     //functions
     fun submitArtistSearchQuery(
+        connectivityChecker: ConnectivityChecker,
         onError : (Throwable) -> Unit = {}
     ) = viewModelScope.launch{
         _loadingState.value = LoadingState.LOADING
         clearViewModelData()
-        val job = launch { loadData(onError,1) }
+        val job = launch { loadData(connectivityChecker,onError,1) }
         job.join()
         _loadingState.value = LoadingState.IDLE
     }
 
-    fun loadMoreSearchData(onError : (Throwable) -> Unit = {}) = viewModelScope.launch{
+    fun loadMoreSearchData(
+            connectivityChecker: ConnectivityChecker,
+            onError : (Throwable) -> Unit = {}
+    ) = viewModelScope.launch{
         _searchedArtistsResultChunks.value.notNullSuspending { currentResults ->
             if(currentResults.isNotEmpty()){
                 _loadingState.value = LoadingState.RELOADING
                 val page = currentResults.last().startPage + 1
-                val job = launch { loadData(onError,page) }
+                val job = launch { loadData(connectivityChecker,onError,page) }
                 job.join()
                 _loadingState.value = LoadingState.IDLE
             }
         }
     }
+
+    /**This function loads the latest cached data for the Search from the DataRepository*/
+    fun loadLastSearchResults() = viewModelScope.launch {
+        val lastSearchRes = DataRepository.lastArtistSearchResult()
+        if (lastSearchRes is DataRepositoryResponse.Data<List<ArtistSearchResult>>) {
+            _searchedArtistsResultChunks.value = lastSearchRes.value
+        }
+    }
+
 
     //help functions
     private fun clearViewModelData(){
@@ -85,34 +106,23 @@ class SearchArtistViewModel : ViewModel() {
      * @param startPage The Page to start the search
      *
      */
-    private suspend fun loadData(onError : (Throwable) -> Unit = {}, startPage : Int) = coroutineScope{
-        val repoResponse = DataRepository.searchForArtists(searchQuery.value ?: "",startPage)
+    private suspend fun loadData(
+            connectivityChecker: ConnectivityChecker,
+            onError : (Throwable) -> Unit = {},
+            startPage : Int
+    ) = coroutineScope{
+        val repoResponse = DataRepository.searchForArtists(connectivityChecker,artistSearchQuery,startPage)
         when(repoResponse){
-            is DataRepositoryResponse.Data<ArtistSearchResults> ->{
+            is DataRepositoryResponse.Data<ArtistSearchResult> ->{
                 if(repoResponse.value.items.isNotEmpty()){
-                    val newChunksDef = async(Dispatchers.IO) {
-                        val distinctArtists = repoResponse.value.items
-                                .filter { artist ->
-                                    !allArtists.contains(artist)
-                                }
-                        val distinctSearchResults = ArtistSearchResults(
-                                repoResponse.value.totalResults,
-                                repoResponse.value.startPage,
-                                repoResponse.value.startIndex,
-                                distinctArtists.size,
-                                distinctArtists
-                        )
-                        _searchedArtistsResultChunks.value
-                                ?.toMutableList()
-                                ?.apply {
-                                    add(distinctSearchResults)
-                                }
-                    }
-                    _searchedArtistsResultChunks.value = newChunksDef.await()
+                    _searchedArtistsResultChunks.value = _searchedArtistsResultChunks.value
+                            ?.toMutableList()
+                            ?.apply {
+                                add(repoResponse.value)
+                            }
                 }
             }
             is DataRepositoryResponse.Error -> onError(repoResponse.error)
         }
     }
-
 }

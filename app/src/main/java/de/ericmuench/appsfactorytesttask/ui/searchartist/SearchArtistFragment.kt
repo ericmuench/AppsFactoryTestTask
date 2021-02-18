@@ -6,6 +6,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,10 +15,12 @@ import de.ericmuench.appsfactorytesttask.databinding.FragmentSearchArtistBinding
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.RecyclerViewPositionDetector
+import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.*
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.SearchArtistViewModel
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 /**
  * A simple [Fragment] subclass, which is responsible for the search of an artist.
@@ -36,6 +39,7 @@ class SearchArtistFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View{
         setHasOptionsMenu(true)
+        println("Last Search Text in Oncreate was: ${viewModel.artistSearchQuery}")
         viewBinding = FragmentSearchArtistBinding.inflate(inflater)
         return viewBinding.root
     }
@@ -55,18 +59,10 @@ class SearchArtistFragment : Fragment() {
 
     }
 
+
     override fun onStop() {
         super.onStop()
         viewBinding.recyclerviewSearchArtist.clearOnScrollListeners()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        /*clear text change listener to remove SearchView-Bug that Text is not restored after
-        * after rotation change
-        * */
-        searchViewItem?.setOnQueryTextFocusChangeListener(null)
-
     }
 
     //help functions for Layout setup
@@ -94,7 +90,7 @@ class SearchArtistFragment : Fragment() {
 
             val positionDetector = RecyclerViewPositionDetector().apply {
                 onEndReached = {
-                    viewModel.loadMoreSearchData { onHandleError(it) }
+                    viewModel.loadMoreSearchData(ConnectivityChecker(context))
                 }
             }
             recyclerviewSearchArtist.addOnScrollListener(positionDetector)
@@ -104,7 +100,7 @@ class SearchArtistFragment : Fragment() {
     //TODO: Doc
     private fun setupSearchView(menuItem : MenuItem?){
 
-        val isSearching = viewModel.isSearching.value ?: false
+        val isSearching = viewModel.isSearchingArtist
         if(isSearching){
             menuItem?.expandActionView()
         }
@@ -112,21 +108,27 @@ class SearchArtistFragment : Fragment() {
         menuItem?.actionView.castedAs<SearchView> { searchView ->
             searchViewItem = searchView
             searchView.removeSearchPlate()
-            searchView.setQuery(viewModel.searchQuery.value ?: "",false)
+
+            searchView.setQuery(viewModel.pendingArtistSearchQuery,false)
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     query.notNull { queryNN ->
-                        hideKeyboard()
-                        println("Submit Text: $queryNN")
-                        viewModel.searchQuery.value = queryNN
-                        viewModel.submitArtistSearchQuery { onHandleError(it) }
+                        lifecycleScope.launch {
+                            hideKeyboard()
+                            viewModel.artistSearchQuery = queryNN
+                            viewModel.submitArtistSearchQuery(ConnectivityChecker(context)) {
+                                onHandleError(it)
+                            }
+                        }
                     }
-                    return false
+                    return true
                 }
 
                 override fun onQueryTextChange(newText: String?): Boolean {
-                    viewModel.searchQuery.value = newText
-                    return false
+                    if(!searchView.isIconified && isVisible){
+                        viewModel.pendingArtistSearchQuery = newText ?: ""
+                    }
+                    return true
                 }
             })
         }
@@ -134,12 +136,12 @@ class SearchArtistFragment : Fragment() {
 
         menuItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener{
             override fun onMenuItemActionExpand(p0: MenuItem?): Boolean {
-                viewModel.isSearching.value = true
+                viewModel.isSearchingArtist = true
                 return true
             }
 
             override fun onMenuItemActionCollapse(p0: MenuItem?): Boolean {
-                viewModel.isSearching.value = false
+                viewModel.isSearchingArtist = false
                 return true
             }
         })
@@ -192,6 +194,9 @@ class SearchArtistFragment : Fragment() {
                 }
             }
         }
+
+        //load init data
+        viewModel.loadLastSearchResults()
     }
 
     //help functions for error handling

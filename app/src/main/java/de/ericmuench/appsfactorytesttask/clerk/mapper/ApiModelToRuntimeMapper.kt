@@ -4,7 +4,7 @@ import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.ArtistSearchR
 import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.SearchedArtistFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.error.ErrorFromLastFm
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
-import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResults
+import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 
 /**
  * This class should map ApiTypes from LastFM to classes in Runtime Model
@@ -13,8 +13,8 @@ class ApiModelToRuntimeMapper {
 
     //functions for artist search
     fun mapArtistSearchResults(apiSearchRes : ArtistSearchResultFromLastFm)
-        : ArtistSearchResults = with(apiSearchRes.artistResults){
-        return@with ArtistSearchResults(
+        : ArtistSearchResult = with(apiSearchRes.artistResults){
+        return@with ArtistSearchResult(
             opensearchTotalResults.toInt(),
             opensearchQuery.startPage.toInt(),
             opensearchStartIndex.toInt(),

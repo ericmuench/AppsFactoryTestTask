@@ -4,7 +4,7 @@
     <item
         android:title="@string/search_artists"
         android:icon="@drawable/ic_search"
-        app:showAsAction="ifRoom|collapseActionView"
+        app:showAsAction="always|collapseActionView"
         android:id="@+id/search_artist_acbar_item_searchbar"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
 
