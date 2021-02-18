@@ -109,8 +109,8 @@ class SearchArtistFragment : Fragment() {
             menuItem?.expandActionView()
         }
 
-        searchViewItem = menuItem?.actionView as? SearchView
         menuItem?.actionView.castedAs<SearchView> { searchView ->
+            searchViewItem = searchView
             searchView.removeSearchPlate()
             searchView.setQuery(viewModel.searchQuery.value ?: "",false)
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
