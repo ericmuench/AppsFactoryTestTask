@@ -4,13 +4,13 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import kotlin.reflect.KClass
 
 /**
  * This file contains helpful extensions for Android Components to reduce code e.g. in Activities.
@@ -37,15 +37,48 @@ fun Activity.runsInOrientation(orientation: Int) : Boolean{
     return currentOrientation == orientation
 }
 
+
 /**
- * This function can switch the View to another Activity by starting a new Intent.
- * @param clazz The Type of Activity to switch to
+ * This function can switch the View to another Activity by starting a new Intent. It is an
+ * alternative to the other switchToActivity-Function using a class parameter.
  * @param config A anonymous extension function to config the Intent that is used to switch the Activity
  * */
-fun <T : Any> Activity.switchToActivity(clazz : KClass<T>, config: Intent.() -> Unit = {}){
-    val intent = Intent(this,clazz.java)
+inline fun <reified T : Activity> Activity.switchToActivity(config: Intent.() -> Unit = {}){
+    val intent = Intent(this,T::class.java)
     config(intent)
     startActivity(intent)
+}
+
+/**
+ * This function can switch the View to another Activity requesting for a result. It also uses an
+ * Intent for switching the view.
+ *
+ * @param requestCode The Request-Code for an Activity-Change with Result
+ * @param optionsBundle An Options-Bundle that can be used normally when using startActivityForResult
+ * @param config A anonymous extension function to config the Intent that is used to switch the Activity
+ *
+ * */
+inline fun <reified T : Activity> Activity.switchToActivityForResult(
+        requestCode: Int,
+        optionsBundle: Bundle? = null,
+        config: Intent.() -> Unit = {}
+){
+    val intent = Intent(this,T::class.java)
+    config(intent)
+    startActivityForResult(intent,requestCode,optionsBundle)
+}
+
+/**
+ * This function can be used to finish an Activity with a certain result data and a result Code.
+ *
+ * @param resultCode Whether the result is ok or cancelled
+ * @param modifyIntent An extension function to config the Intent and put Result-Data in it
+ */
+fun Activity.finishWithResultData(resultCode: Int,modifyIntent : Intent.()->Unit){
+    val resultIntent = Intent()
+    modifyIntent.invoke(resultIntent)
+    setResult(resultCode, resultIntent)
+    finish()
 }
 
 /**
@@ -65,6 +98,43 @@ fun Activity.hideKeyboard(){
  * of the underlying Activity.
  */
 fun Fragment.hideKeyboard() = activity?.hideKeyboard()
+
+/**
+ * This function can switch the View to another Activity by starting a new Intent. It is an
+ * alternative to the other switchToActivity-Function using a class parameter.
+ * @param config A anonymous extension function to config the Intent that is used to switch the Activity
+ * */
+inline fun <reified T : Activity> Fragment.switchToActivity(config: Intent.() -> Unit = {}){
+    val cntxt = context
+    if(cntxt != null){
+        val intent = Intent(cntxt,T::class.java)
+        config(intent)
+        startActivity(intent)
+    }
+}
+
+/**
+ * This function can switch the View to another Activity requesting for a result. It also uses an
+ * Intent for switching the view.
+ *
+ * @param requestCode The Request-Code for an Activity-Change with Result
+ * @param optionsBundle An Options-Bundle that can be used normally when using startActivityForResult
+ * @param config A anonymous extension function to config the Intent that is used to switch the Activity
+ *
+ * */
+inline fun <reified T : Activity> Fragment.switchToActivityForResult(
+        requestCode: Int,
+        optionsBundle: Bundle? = null,
+        config: Intent.() -> Unit = {}
+){
+    val cntxt = context
+    if(cntxt != null){
+        val intent = Intent(cntxt,T::class.java)
+        config(intent)
+        startActivityForResult(intent,requestCode,optionsBundle)
+    }
+
+}
 
 //Concrete UI Components Extensions
 /**
