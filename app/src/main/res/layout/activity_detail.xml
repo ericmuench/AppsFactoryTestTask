@@ -108,6 +108,20 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
+                <androidx.core.widget.ContentLoadingProgressBar
+                    android:id="@+id/progress_description_detail"
+                    style="?android:attr/progressBarStyle"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:indeterminateTint="?attr/colorPrimary"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/txt_headline_description_detail" />
+
                 <TextView
                     android:id="@+id/txt_description_detail"
                     android:layout_width="0dp"
@@ -115,10 +129,9 @@
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
-                    android:text="description_content"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/txt_headline_description_detail" />
+                    app:layout_constraintTop_toBottomOf="@+id/progress_description_detail" />
 
                 <Button
                     android:id="@+id/btn_more_detail"
@@ -149,6 +162,21 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/btn_more_detail" />
+
+                <androidx.core.widget.ContentLoadingProgressBar
+                    android:id="@+id/progress_data_detail"
+                    android:visibility="gone"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:indeterminateTint="?attr/colorPrimary"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/txt_headline_data_detail" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -122,6 +122,15 @@ abstract class DetailActivity : BaseActivity() {
     protected fun <VH: RecyclerView.ViewHolder> setRecyclerViewAdapter(adapter: RecyclerView.Adapter<VH>){
         viewBinding.recyclerViewDataDetail.adapter = adapter
     }
+
+    protected fun hideDescriptionProgressBar() = viewBinding.progressDescriptionDetail.hide()
+    protected fun showDescriptionProgressBar() = viewBinding.progressDescriptionDetail.show()
+    protected fun hideDataProgressBar() = viewBinding.progressDataDetail.hide()
+    protected fun showDataProgressBar() = viewBinding.progressDataDetail.show()
+    protected fun hideAllProgressbars() {
+        hideDataProgressBar()
+        hideDescriptionProgressBar()
+    }
     //endregion
 
 

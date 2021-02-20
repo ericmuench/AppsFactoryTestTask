@@ -22,9 +22,13 @@ class ArtistDetailActivity : DetailActivity() {
         setMoreButtonOnClickListener {
             if(testVisibility){
                 hideFabAction()
+                hideDescriptionProgressBar()
+                hideDataProgressBar()
             }
             else{
                 showFabAction()
+                showDataProgressBar()
+                showDescriptionProgressBar()
             }
             testVisibility = !testVisibility
         }
