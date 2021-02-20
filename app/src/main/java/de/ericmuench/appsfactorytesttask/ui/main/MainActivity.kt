@@ -9,11 +9,12 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.databinding.ActivityMainBinding
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseActivity
 
 /**
  * This class defines the MainActivity of this application with the Main-Menu
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
 
     //lifecycle functions

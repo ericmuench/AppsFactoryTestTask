@@ -11,6 +11,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
+import kotlin.reflect.KClass
 
 /**
  * This file contains helpful extensions for Android Components to reduce code e.g. in Activities.
@@ -98,6 +99,7 @@ fun Activity.hideKeyboard(){
  * of the underlying Activity.
  */
 fun Fragment.hideKeyboard() = activity?.hideKeyboard()
+
 
 /**
  * This function can switch the View to another Activity by starting a new Intent. It is an

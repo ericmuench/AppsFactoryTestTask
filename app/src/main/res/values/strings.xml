@@ -9,4 +9,6 @@
     <string name="error_template_try_again">An Error occurred:#Please try again!</string>
     <string name="clear_search_results">Clear Search Results</string>
     <string name="question_sure_clear_all_artist_search_results">Would you really like to delete all Artist-Search-Results?</string>
+    <string name="more">More</string>
+    <string name="navigate_back">Navigate Back</string>
 </resources>

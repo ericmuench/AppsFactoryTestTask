@@ -13,6 +13,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.databinding.FragmentSearchArtistBinding
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
+import de.ericmuench.appsfactorytesttask.ui.detail.ArtistDetailActivity
+import de.ericmuench.appsfactorytesttask.ui.detail.DetailActivity
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseFragment
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.RecyclerViewPositionDetector
 import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
@@ -24,16 +27,17 @@ import kotlinx.coroutines.launch
 /**
  * A simple [Fragment] subclass, which is responsible for the search of an artist.
  */
-class SearchArtistFragment : Fragment() {
+class SearchArtistFragment : BaseFragment() {
 
-    //fields
+    //region fields
     private lateinit var viewBinding : FragmentSearchArtistBinding
     private val viewModel : SearchArtistViewModel by viewModels()
 
     private var recyclerViewAdapter : GenericSimpleItemAdapter<Artist>? = null
     private var searchViewItem : SearchView? = null
+    //endregion
 
-    //lifecycle functions
+    //region lifecycle functions
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View{
@@ -62,6 +66,10 @@ class SearchArtistFragment : Fragment() {
                 requestSearchResultsClear()
                 true
             }
+            R.id.search_artist_acbar_item_test -> {
+                switchToActivity<ArtistDetailActivity>()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -70,8 +78,9 @@ class SearchArtistFragment : Fragment() {
         super.onStop()
         viewBinding.recyclerviewSearchArtist.clearOnScrollListeners()
     }
+    //endregion
 
-    //help functions for Layout setup
+    //region help functions for Layout setup
     /**
      * This function sets up all components that are related to the recyclerview of this Fragment
      * displaying the Search-Result for artists.
@@ -82,6 +91,7 @@ class SearchArtistFragment : Fragment() {
             recyclerViewAdapter = GenericSimpleItemAdapter(act, emptyList<Artist>())
                 .onApplyDataToViewHolder { holder, artist, _ ->
                     holder.txtText.text = artist.artistName
+                    //TODO: Remove this comment
                     /*holder.checkBox.setButtonDrawable(R.drawable.item_stored_selector)
                     holder.checkBox.setOnCheckedChangeListener { box, checked ->
                         println("value of $str is now $checked")
@@ -90,6 +100,7 @@ class SearchArtistFragment : Fragment() {
                     holder.cardView.setOnClickListener {
                         println("${artist.artistName} was clicked")
                         //TODO: Open detail page for artist (top album overview)
+                        switchToActivity<ArtistDetailActivity>()
                     }
                 }
             recyclerviewSearchArtist.adapter = recyclerViewAdapter
@@ -123,7 +134,7 @@ class SearchArtistFragment : Fragment() {
                             hideKeyboard()
                             viewModel.artistSearchQuery = queryNN
                             viewModel.submitArtistSearchQuery(ConnectivityChecker(context)) {
-                                onHandleError(it)
+                                handleError(it)
                             }
                         }
                     }
@@ -152,8 +163,9 @@ class SearchArtistFragment : Fragment() {
             }
         })
     }
+    //endregion
 
-    //help functions for Viewmodel setup
+    //region help functions for Viewmodel setup
     private fun setupViewModel() = with(viewModel){
         //observer for search results
         searchedArtistsResultChunks.observe(viewLifecycleOwner) { vmSearchData ->
@@ -204,32 +216,9 @@ class SearchArtistFragment : Fragment() {
         //load init data
         viewModel.loadLastSearchResults()
     }
+    //endregion
 
-    //help functions for error handling
-    /**
-     * This function handles an Error by showing Feedback in the UI for the User
-     *
-     * @param error A Throwable-Object which usually contains an Exception
-     * */
-     private fun onHandleError(error: Throwable){
-        activity.notNull { act ->
-            val errorMsg = resources
-                    .getString(R.string.error_template_try_again)
-                    .replace("#","\n\n${error.localizedMessage}\n\n")
-
-            AlertDialog.Builder(act)
-                    .setTitle(R.string.error)
-                    .setMessage(errorMsg)
-                    .setPositiveButton(android.R.string.ok) { dialogInterface, _ ->
-                        dialogInterface.dismiss()
-                    }
-                    .create()
-                    .show()
-        }
-        error.printStackTrace()
-    }
-
-    //further help functions
+    //region further help functions
     /**
      * This function should ask the user if he/she wants to delete the results of the search and
      * do so if that's the case.
@@ -253,4 +242,5 @@ class SearchArtistFragment : Fragment() {
                     .show()
         }
     }
+    //endregion
 }

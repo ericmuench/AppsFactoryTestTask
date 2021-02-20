@@ -13,4 +13,9 @@
         android:icon="@drawable/ic_clear_all"
         android:title="@string/clear_search_results"
         android:id="@+id/search_artist_acbar_item_clear_items"/>
+
+    <item
+        app:showAsAction="ifRoom"
+        android:title="test"
+        android:id="@+id/search_artist_acbar_item_test"/>
 </menu>

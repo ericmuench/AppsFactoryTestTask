@@ -1,5 +1,6 @@
 package de.ericmuench.appsfactorytesttask.model.runtime
 
+import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -9,7 +10,7 @@ data class Artist(
     var description : String,
     val onlineUrl : String?,
     val albums : List<Album>
-){
+) : Parcelable{
     override fun equals(other: Any?): Boolean {
         if(other == null || other !is Artist){
             return false
@@ -37,13 +38,13 @@ data class Album(
     val onlineUrl : String?,
     val imgUrl : String?,
     val songs: List<Song>
-)
+) : Parcelable
 
 @Parcelize
 data class Song(
     val title: String,
     val onlineUrl: String?
-)
+) : Parcelable
 
 data class ArtistSearchResult(
     val totalResults : Int,
