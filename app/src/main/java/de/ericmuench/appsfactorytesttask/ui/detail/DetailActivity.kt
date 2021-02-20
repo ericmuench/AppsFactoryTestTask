@@ -1,5 +1,6 @@
 package de.ericmuench.appsfactorytesttask.ui.detail
 
+import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
@@ -8,6 +9,7 @@ import android.widget.Button
 import android.widget.ImageView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.databinding.ActivityDetailBinding
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseActivity
@@ -66,8 +68,40 @@ abstract class DetailActivity : BaseActivity() {
         collapsingToolbarLayoutDetail?.title = title
     }
 
-    val imgView : ImageView
+    val imgViewDetail : ImageView
     get() = viewBinding.imgDetail
+
+    protected fun setFabActionOnClickListener(listener: (View?) -> Unit) = with(viewBinding){
+        if(runsInLandscape()){
+            imgBtnFabSubstituteLand?.setOnClickListener(listener)
+        }
+
+        fabDetail?.setOnClickListener(listener)
+    }
+
+    protected fun setFabActionIconDrawable(drawable : Drawable?) = with(viewBinding){
+        if(runsInLandscape()){
+            imgBtnFabSubstituteLand?.setImageDrawable(drawable)
+        }
+
+        fabDetail?.setImageDrawable(drawable)
+    }
+
+    protected fun hideFabAction()= with(viewBinding){
+        if(runsInLandscape()){
+            imgBtnFabSubstituteLand?.visibility = View.INVISIBLE
+        }
+
+        fabDetail?.visibility = View.GONE
+    }
+
+    protected fun showFabAction()= with(viewBinding){
+        if(runsInLandscape()){
+            imgBtnFabSubstituteLand?.visibility = View.VISIBLE
+        }
+
+        fabDetail?.visibility = View.VISIBLE
+    }
 
     protected fun setDescriptionHeadline(headline : CharSequence)= with(viewBinding){
         txtHeadlineDescriptionDetail.text = headline
@@ -82,9 +116,7 @@ abstract class DetailActivity : BaseActivity() {
     }
 
     protected fun setMoreButtonOnClickListener(listener : (View?) -> Unit) = with(viewBinding){
-        btnMoreDetail.setOnClickListener {
-            listener(it)
-        }
+        btnMoreDetail.setOnClickListener(listener)
     }
 
     protected fun <VH: RecyclerView.ViewHolder> setRecyclerViewAdapter(adapter: RecyclerView.Adapter<VH>){

@@ -8,6 +8,7 @@
     tools:context=".ui.detail.DetailActivity">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar_layout_detail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
@@ -64,7 +65,20 @@
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Dark" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+
     </com.google.android.material.appbar.AppBarLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_detail"
+        android:src="@drawable/ic_clear_all"
+        android:backgroundTint="?attr/colorSecondaryVariant"
+        app:tint="?attr/colorPrimaryVariant"
+        android:layout_width="wrap_content"
+        app:layout_anchor="@id/appbar_layout_detail"
+        app:layout_anchorGravity="bottom|right|end"
+        android:layout_marginEnd="16dp"
+        android:layout_height="wrap_content" />
 
     <androidx.core.widget.NestedScrollView
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
