@@ -34,16 +34,21 @@ class ArtistDetailActivity : DetailActivity() {
         }
 
         val dummy = List(20){"Item ${it+1}"}
-        setRecyclerViewAdapter(GenericSimpleItemAdapter<String>(this,dummy)
+        val adapter = GenericSimpleItemAdapter<String>(this,dummy)
             .onApplyDataToViewHolder { holder, str, _ ->
                 holder.txtText.text = str
-            })
+            }
+
+        setRecyclerViewAdapter(adapter)
+
+
 
         //val draw = ResourcesCompat.getDrawable(resources,R.drawable.ic_album,null)
         //imgViewDetail.setImageDrawable(draw)
 
         setFabActionOnClickListener {
             Toast.makeText(this,"MORE!",Toast.LENGTH_SHORT).show()
+            adapter.addElements(List(5){"Item ${it+1+adapter.itemCount}"})
         }
         setFabActionIconDrawable(ResourcesCompat.getDrawable(resources,R.drawable.ic_search,null))
     }
