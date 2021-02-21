@@ -101,6 +101,7 @@ class ArtistDetailActivity : DetailActivity() {
             val onlineUrlAvailable = viewModel.detailData.value?.onlineUrl != null
             setMoreButtonIsEnabled(onlineUrlAvailable)
         }
+
     }
     //endregion
 
@@ -120,6 +121,7 @@ class ArtistDetailActivity : DetailActivity() {
         if(intentData != null){
             if(viewModel.detailData.value == null){
                 viewModel.initializeWithTransferredData(intentData)
+                viewModel.loadData{ handleError(it) }
                 //TODO: Start loading data
             }
 

@@ -133,6 +133,8 @@
                 android:id="@+id/txt_description_detail"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:autoLink="web"
+                android:textColorLink="@color/blue_500"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -142,6 +144,7 @@
             <Button
                 android:id="@+id/btn_more_detail"
                 style="@style/StyleButton"
+                android:textSize="18sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"

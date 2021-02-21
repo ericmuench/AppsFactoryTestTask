@@ -1,11 +1,15 @@
 package de.ericmuench.appsfactorytesttask.clerk.mapper
 
+import de.ericmuench.appsfactorytesttask.model.lastfm.albuminfo.AlbumInfoFromLastFm
+import de.ericmuench.appsfactorytesttask.model.lastfm.artistinfo.ArtistInfoFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.ArtistSearchResultFromLastFm
-import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.ImageFromLastFm
+import de.ericmuench.appsfactorytesttask.model.lastfm.image.ImageFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.SearchedArtistFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.error.ErrorFromLastFm
+import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
+import de.ericmuench.appsfactorytesttask.model.runtime.Song
 import java.util.*
 
 /**
@@ -13,7 +17,7 @@ import java.util.*
  */
 class ApiModelToRuntimeMapper {
 
-    //functions for artist search
+    //region functions for artist search
     fun mapArtistSearchResults(apiSearchRes : ArtistSearchResultFromLastFm)
         : ArtistSearchResult = with(apiSearchRes.artistResults){
         return@with ArtistSearchResult(
@@ -35,9 +39,34 @@ class ApiModelToRuntimeMapper {
         artistName = apiArtist.name,
         description = "",
         onlineUrl = apiArtist.url,
-        albums = emptyList(),
         imageUrl = getImageUrlFromLastFmImageList("medium",apiArtist.image)
     )
+    //endregion
+
+    //region functions for albums
+    fun mapAlbumInfo(apiAlbumInfo : AlbumInfoFromLastFm) : Album {
+        return Album(
+            mbid = apiAlbumInfo.album.mbid,
+            title = apiAlbumInfo.album.name,
+            description = apiAlbumInfo.album.wiki.summary,
+            imgUrl = getImageUrlFromLastFmImageList("extralarge",apiAlbumInfo.album.image),
+            onlineUrl = apiAlbumInfo.album.url,
+            songs = apiAlbumInfo.album.tracks.track.map {
+                Song(it.name,it.url)
+            }
+        )
+    }
+    //endregion
+
+    //region functions for Artists
+    fun mapArtistInfo(apiArtistInfo: ArtistInfoFromLastFm) : Artist = Artist(
+        mbid = apiArtistInfo.artist.mbid,
+        artistName = apiArtistInfo.artist.name,
+        description = apiArtistInfo.artist.bio.summary.trim(),
+        onlineUrl = apiArtistInfo.artist.url,
+        imageUrl = getImageUrlFromLastFmImageList("medium",apiArtistInfo.artist.image)
+    )
+    //endregion
 
 
     //functions for Errors

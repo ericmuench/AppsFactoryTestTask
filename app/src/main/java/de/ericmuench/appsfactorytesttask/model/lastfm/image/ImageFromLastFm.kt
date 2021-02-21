@@ -1,4 +1,4 @@
-package de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch
+package de.ericmuench.appsfactorytesttask.model.lastfm.image
 
 
 import com.google.gson.annotations.SerializedName

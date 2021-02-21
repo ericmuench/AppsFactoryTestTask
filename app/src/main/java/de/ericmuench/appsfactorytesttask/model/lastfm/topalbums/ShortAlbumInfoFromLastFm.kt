@@ -1,20 +1,20 @@
-package de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch
+package de.ericmuench.appsfactorytesttask.model.lastfm.topalbums
 
 
 import com.google.gson.annotations.SerializedName
 import de.ericmuench.appsfactorytesttask.model.lastfm.image.ImageFromLastFm
 
-data class SearchedArtistFromLastFm(
+data class ShortAlbumInfoFromLastFm(
+    @SerializedName("artist")
+    val artist: ArtistFromLastFm,
     @SerializedName("image")
     val image: List<ImageFromLastFm>,
-    @SerializedName("listeners")
-    val listeners: String,
     @SerializedName("mbid")
-    val mbid: String,
+    val mbid: String?,
     @SerializedName("name")
     val name: String,
-    @SerializedName("streamable")
-    val streamable: String,
+    @SerializedName("playcount")
+    val playcount: Int,
     @SerializedName("url")
     val url: String
 )

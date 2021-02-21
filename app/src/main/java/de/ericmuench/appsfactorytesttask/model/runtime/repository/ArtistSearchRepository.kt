@@ -43,8 +43,8 @@ class ArtistSearchRepository(private val apiClient : LastFmApiClient) {
     suspend fun searchForArtists(
         connectivityChecker: ConnectivityChecker,
         searchQuery : String,
-        startPage : Int = 1,
-        limitPerPage : Int = 10
+        startPage : Int,
+        limitPerPage : Int
     ) : DataRepositoryResponse<ArtistSearchResult,Throwable> = coroutineScope{
 
         val cachedDataDef = async(Dispatchers.IO){ artistSearchCache.getData(searchQuery, startPage, limitPerPage) }

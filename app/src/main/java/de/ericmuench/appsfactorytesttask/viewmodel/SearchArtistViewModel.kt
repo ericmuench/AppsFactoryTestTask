@@ -32,21 +32,21 @@ class SearchArtistViewModel : ViewModel() {
 
     //fields
     var isSearchingArtist : Boolean
-        get() = DataRepository.artistSearchRepository.isSearchingArtist
+        get() = DataRepository.isSearchingArtist
         set(value) {
-            DataRepository.artistSearchRepository.isSearchingArtist = value
+            DataRepository.isSearchingArtist = value
         }
 
     var artistSearchQuery : String
-        get() = DataRepository.artistSearchRepository.artistSearchQuery
+        get() = DataRepository.artistSearchQuery
         set(value) {
-            DataRepository.artistSearchRepository.artistSearchQuery = value
+            DataRepository.artistSearchQuery = value
         }
 
     var pendingArtistSearchQuery : String
-        get() = DataRepository.artistSearchRepository.pendingArtistSearchQuery
+        get() = DataRepository.pendingArtistSearchQuery
         set(value) {
-            DataRepository.artistSearchRepository.pendingArtistSearchQuery = value
+            DataRepository.pendingArtistSearchQuery = value
         }
 
     val allArtists : List<Artist>
@@ -84,7 +84,7 @@ class SearchArtistViewModel : ViewModel() {
 
     /**This function loads the latest cached data for the Search from the DataRepository*/
     fun loadLastSearchResults() = viewModelScope.launch {
-        val lastSearchRes = DataRepository.artistSearchRepository.lastArtistSearchResult()
+        val lastSearchRes = DataRepository.lastArtistSearchResult()
         if (lastSearchRes is DataRepositoryResponse.Data<List<ArtistSearchResult>>) {
             _searchedArtistsResultChunks.value = lastSearchRes.value
         }
@@ -110,9 +110,7 @@ class SearchArtistViewModel : ViewModel() {
             onError : (Throwable) -> Unit = {},
             startPage : Int
     ) = coroutineScope{
-        val repoResponse = DataRepository
-            .artistSearchRepository
-            .searchForArtists(connectivityChecker,artistSearchQuery,startPage)
+        val repoResponse = DataRepository.searchForArtists(connectivityChecker,artistSearchQuery,startPage)
         when(repoResponse){
             is DataRepositoryResponse.Data<ArtistSearchResult> ->{
                 if(repoResponse.value.items.isNotEmpty()){

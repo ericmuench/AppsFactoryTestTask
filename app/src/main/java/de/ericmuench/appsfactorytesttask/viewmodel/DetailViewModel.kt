@@ -33,6 +33,10 @@ abstract class DetailViewModel<T> : ViewModel() {
         _detailData.value = data
         return true
     }
+
+    protected fun setDetailDataValue(value : T){
+        _detailData.value = value
+    }
     //endregion
 
     //region abstract functions

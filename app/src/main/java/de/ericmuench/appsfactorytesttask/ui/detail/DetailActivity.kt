@@ -3,10 +3,13 @@ package de.ericmuench.appsfactorytesttask.ui.detail
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.Html
+import android.text.method.LinkMovementMethod
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -35,6 +38,7 @@ abstract class DetailActivity : BaseActivity() {
 
         //setup Layout
         setupToolbar()
+        setupDescriptionTextView()
         setupRecyclerView()
     }
     //endregion
@@ -54,6 +58,11 @@ abstract class DetailActivity : BaseActivity() {
 
     private fun setupRecyclerView() = with(viewBinding){
         recyclerViewDataDetail.layoutManager = LinearLayoutManager(this@DetailActivity)
+    }
+
+    private fun setupDescriptionTextView() = with(viewBinding){
+        txtDescriptionDetail.isClickable = true
+        txtDescriptionDetail.movementMethod = LinkMovementMethod.getInstance();
     }
     //endregion
 
@@ -108,7 +117,7 @@ abstract class DetailActivity : BaseActivity() {
     }
 
     protected fun setDescription(description: CharSequence) = with(viewBinding){
-        txtDescriptionDetail.text = description
+        txtDescriptionDetail.text = HtmlCompat.fromHtml(description.toString(),HtmlCompat.FROM_HTML_OPTION_USE_CSS_COLORS)
     }
 
     protected fun setDataHeadline(headline : CharSequence)= with(viewBinding){

@@ -8,9 +8,13 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import de.ericmuench.appsfactorytesttask.BuildConfig
 import de.ericmuench.appsfactorytesttask.clerk.mapper.ApiModelToRuntimeMapper
+import de.ericmuench.appsfactorytesttask.model.lastfm.albuminfo.AlbumInfoFromLastFm
+import de.ericmuench.appsfactorytesttask.model.lastfm.artistinfo.ArtistInfoFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.ArtistSearchResultFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.error.ErrorFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.error.ExtendedErrorFromLastFm
+import de.ericmuench.appsfactorytesttask.model.runtime.Album
+import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 import de.ericmuench.appsfactorytesttask.util.formatter.UrlParameterFormatter
 import de.ericmuench.appsfactorytesttask.util.json.GsonPropertyChecker
@@ -62,6 +66,66 @@ class LastFmApiClient {
             Result.error(ex)
         }
 
+    }
+
+    suspend fun getArtist(mbid : String) : Result<Artist,Exception> = coroutineScope {
+        val url = LAST_FM_API_BASE_URL +
+                "?method=artist.getinfo" +
+                "&api_key=${BuildConfig.LastFMApiKey}" +
+                "&mbid=${mbid}" +
+                "&format=json"
+
+        return@coroutineScope try{
+            getResultFromApi<ArtistInfoFromLastFm,ExtendedErrorFromLastFm>(url)
+                .flatMap {
+                    try {
+                        val mapped = dataMapper.mapArtistInfo(it)
+                        Result.success(mapped)
+                    }
+                    catch (ex: Exception){
+                        Result.error(ex)
+                    }
+                }
+        }
+        catch(ex: Exception){
+            Result.error(ex)
+        }
+    }
+
+    suspend fun getTopAlbumsOfArtist(mbidOfArtist: String) : Result<List<Album>,Exception> = coroutineScope {
+        val url = LAST_FM_API_BASE_URL +
+                "?method=artist.gettopalbums" +
+                "&api_key=${BuildConfig.LastFMApiKey}" +
+                "&mbid=${mbidOfArtist}" +
+                "&format=json"
+
+
+        //TODO: remove this
+        return@coroutineScope Result.error(Exception("test"))
+    }
+
+    suspend fun getAlbum(artist: String, albumTitle: String) : Result<Album,Exception> = coroutineScope {
+        val url = LAST_FM_API_BASE_URL +
+                "?method=album.getinfo" +
+                "&api_key=${BuildConfig.LastFMApiKey}" +
+                "&artist=${paramFormat.formatParamForUrl(artist)}" +
+                "&album=${paramFormat.formatParamForUrl(albumTitle)}" +
+                "&format=json"
+
+        return@coroutineScope try {
+            getResultFromApi<AlbumInfoFromLastFm,ExtendedErrorFromLastFm>(url).flatMap {
+                try {
+                    val mapped = dataMapper.mapAlbumInfo(it)
+                    Result.Success(mapped)
+                }
+                catch (ex: Exception){
+                    Result.Failure(ex)
+                }
+            }
+        }
+        catch (ex: Exception){
+            Result.error(ex)
+        }
     }
 
     //help functions
