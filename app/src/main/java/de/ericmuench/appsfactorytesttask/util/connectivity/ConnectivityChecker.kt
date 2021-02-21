@@ -9,9 +9,9 @@ import java.net.InetAddress
 /**
  * This class can check if the device is connected in a certain way
  * */
-class ConnectivityChecker(cntxt: Context?){
+class ConnectivityChecker{ //cntxt: Context?
 
-    private val context : Context? = cntxt?.applicationContext
+    //private val context : Context? = cntxt?.applicationContext
 
     //Functions
     /**

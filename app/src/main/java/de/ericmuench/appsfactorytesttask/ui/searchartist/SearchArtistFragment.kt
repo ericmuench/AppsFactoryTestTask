@@ -3,7 +3,6 @@ package de.ericmuench.appsfactorytesttask.ui.searchartist
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
@@ -11,10 +10,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.ericmuench.appsfactorytesttask.R
+import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_SEARCH_ARTIST_TO_ARTIST_DETAIL_TRANSFERRED_ARTIST
 import de.ericmuench.appsfactorytesttask.databinding.FragmentSearchArtistBinding
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.ui.detail.ArtistDetailActivity
-import de.ericmuench.appsfactorytesttask.ui.detail.DetailActivity
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseFragment
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.RecyclerViewPositionDetector
@@ -100,14 +99,19 @@ class SearchArtistFragment : BaseFragment() {
                     holder.cardView.setOnClickListener {
                         println("${artist.artistName} was clicked")
                         //TODO: Open detail page for artist (top album overview)
-                        switchToActivity<ArtistDetailActivity>()
+                        switchToActivity<ArtistDetailActivity>(){
+                            putExtra(
+                                INTENT_KEY_SEARCH_ARTIST_TO_ARTIST_DETAIL_TRANSFERRED_ARTIST,
+                                artist
+                            )
+                        }
                     }
                 }
             recyclerviewSearchArtist.adapter = recyclerViewAdapter
 
             val positionDetector = RecyclerViewPositionDetector().apply {
                 onEndReached = {
-                    viewModel.loadMoreSearchData(ConnectivityChecker(context))
+                    viewModel.loadMoreSearchData(ConnectivityChecker())
                 }
             }
             recyclerviewSearchArtist.addOnScrollListener(positionDetector)
@@ -133,7 +137,7 @@ class SearchArtistFragment : BaseFragment() {
                         lifecycleScope.launch {
                             hideKeyboard()
                             viewModel.artistSearchQuery = queryNN
-                            viewModel.submitArtistSearchQuery(ConnectivityChecker(context)) {
+                            viewModel.submitArtistSearchQuery(ConnectivityChecker()) {
                                 handleError(it)
                             }
                         }

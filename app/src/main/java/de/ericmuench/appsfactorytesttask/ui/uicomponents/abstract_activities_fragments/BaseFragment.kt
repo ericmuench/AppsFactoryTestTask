@@ -1,5 +1,7 @@
 package de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments
 
+import android.content.Intent
+import android.net.Uri
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -49,6 +51,17 @@ abstract class BaseFragment : Fragment() {
                 .show()
         }
         error.printStackTrace()
+    }
+
+    /**
+     * This function can open an Url to a specific Website using an Intent.
+     * @param link The URL to open in a Browser
+     * */
+    protected fun openWebUrl(link : String){
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(link)
+        }
+        startActivity(intent)
     }
     //endregion
 }

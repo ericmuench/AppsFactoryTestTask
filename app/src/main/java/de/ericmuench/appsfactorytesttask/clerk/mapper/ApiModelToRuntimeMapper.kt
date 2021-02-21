@@ -1,10 +1,12 @@
 package de.ericmuench.appsfactorytesttask.clerk.mapper
 
 import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.ArtistSearchResultFromLastFm
+import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.ImageFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.SearchedArtistFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.error.ErrorFromLastFm
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
+import java.util.*
 
 /**
  * This class should map ApiTypes from LastFM to classes in Runtime Model
@@ -33,10 +35,35 @@ class ApiModelToRuntimeMapper {
         artistName = apiArtist.name,
         description = "",
         onlineUrl = apiArtist.url,
-        albums = emptyList()
+        albums = emptyList(),
+        imageUrl = getImageUrlFromLastFmImageList("medium",apiArtist.image)
     )
 
 
     //functions for Errors
     fun mapError(apiError : ErrorFromLastFm): Exception = Exception(apiError.getLastFmErrorMessage())
+
+    //help functions
+    /**
+     * This function can be used to get an Image-URL out of an List of LastFm-Images. You can
+     * specify a preferred image size. If this one is not available, then the first image in the
+     * image List is chosen. If the list is empty, null will be returned
+     *
+     * @param preference The preferred image size
+     * @param images The list of images to choose the image from
+     *
+     * @return The Image URL for the preferred sized image, the alternative image url or null
+     * */
+    private fun getImageUrlFromLastFmImageList(preference : String, images : List<ImageFromLastFm>) : String?{
+        if(images.isEmpty()){
+            return null
+        }
+
+        return images
+            .filter { it.size.trim().equals(preference.trim(), ignoreCase = true) }
+            .takeIf { it.isNotEmpty() }
+            ?.get(0)
+            ?.text
+            ?: images[0].text
+    }
 }

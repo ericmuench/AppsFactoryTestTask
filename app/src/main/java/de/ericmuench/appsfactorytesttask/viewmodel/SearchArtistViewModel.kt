@@ -5,9 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
-import de.ericmuench.appsfactorytesttask.model.runtime.DataRepository
-import de.ericmuench.appsfactorytesttask.model.runtime.DataRepositoryResponse
+import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepository
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
+import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepositoryResponse
 import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.notNullSuspending
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
@@ -32,21 +32,21 @@ class SearchArtistViewModel : ViewModel() {
 
     //fields
     var isSearchingArtist : Boolean
-        get() = DataRepository.isSearchingArtist
+        get() = DataRepository.artistSearchRepository.isSearchingArtist
         set(value) {
-            DataRepository.isSearchingArtist = value
+            DataRepository.artistSearchRepository.isSearchingArtist = value
         }
 
     var artistSearchQuery : String
-        get() = DataRepository.artistSearchQuery
+        get() = DataRepository.artistSearchRepository.artistSearchQuery
         set(value) {
-            DataRepository.artistSearchQuery = value
+            DataRepository.artistSearchRepository.artistSearchQuery = value
         }
 
     var pendingArtistSearchQuery : String
-        get() = DataRepository.pendingArtistSearchQuery
+        get() = DataRepository.artistSearchRepository.pendingArtistSearchQuery
         set(value) {
-            DataRepository.pendingArtistSearchQuery = value
+            DataRepository.artistSearchRepository.pendingArtistSearchQuery = value
         }
 
     val allArtists : List<Artist>
@@ -84,7 +84,7 @@ class SearchArtistViewModel : ViewModel() {
 
     /**This function loads the latest cached data for the Search from the DataRepository*/
     fun loadLastSearchResults() = viewModelScope.launch {
-        val lastSearchRes = DataRepository.lastArtistSearchResult()
+        val lastSearchRes = DataRepository.artistSearchRepository.lastArtistSearchResult()
         if (lastSearchRes is DataRepositoryResponse.Data<List<ArtistSearchResult>>) {
             _searchedArtistsResultChunks.value = lastSearchRes.value
         }
@@ -110,7 +110,9 @@ class SearchArtistViewModel : ViewModel() {
             onError : (Throwable) -> Unit = {},
             startPage : Int
     ) = coroutineScope{
-        val repoResponse = DataRepository.searchForArtists(connectivityChecker,artistSearchQuery,startPage)
+        val repoResponse = DataRepository
+            .artistSearchRepository
+            .searchForArtists(connectivityChecker,artistSearchQuery,startPage)
         when(repoResponse){
             is DataRepositoryResponse.Data<ArtistSearchResult> ->{
                 if(repoResponse.value.items.isNotEmpty()){

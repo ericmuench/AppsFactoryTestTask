@@ -9,6 +9,7 @@ data class Artist(
     val artistName : String,
     var description : String,
     val onlineUrl : String?,
+    val imageUrl : String?,
     val albums : List<Album>
 ) : Parcelable{
     override fun equals(other: Any?): Boolean {

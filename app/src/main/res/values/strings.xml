@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">AppsFactoryTestTask</string>
     <string name="albums">Albums</string>
+    <string name="songs">Songs</string>
     <string name="search">Search</string>
     <string name="search_artists">Search Artists</string>
     <string name="search_artists_hint">Search for an artist…</string>
@@ -11,4 +12,6 @@
     <string name="question_sure_clear_all_artist_search_results">Would you really like to delete all Artist-Search-Results?</string>
     <string name="more">More</string>
     <string name="navigate_back">Navigate Back</string>
+    <string name="about_artist">About the Artist</string>
+    <string name="about_album">About the Album</string>
 </resources>

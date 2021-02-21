@@ -1,9 +1,10 @@
-package de.ericmuench.appsfactorytesttask.model.runtime
+package de.ericmuench.appsfactorytesttask.model.runtime.repository
 
 import com.github.kittinunf.result.Result
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
+import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchCache
+import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
-import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -11,27 +12,19 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 
 /**
- * This object defines the global DataSource for the runtime Model. All Data is loaded from here.
- * It does abstraction over Network calls or local DB- data access so that higher architecture-
- * layer do not have to care about the origin of the data. Additionally to that, runtime-caching
- * is provided.
- */
-object DataRepository {
-    //fields
-    /**This field is responsible for all network API-Calls*/
-    private val apiClient = LastFmApiClient()
+ * This class defines a repository for providing all data associated with Searching an Artist
+ * */
 
-    //TODO: Add further fields for room and runtime cache
-
-    //fields
+class ArtistSearchRepository(private val apiClient : LastFmApiClient) {
+    //region fields
     /**This field caches the current Search-Query results and search states*/
     private val artistSearchCache = ArtistSearchCache()
 
     var isSearchingArtist : Boolean
-    get() = artistSearchCache.isSearching
-    set(value) {
-        artistSearchCache.isSearching = value
-    }
+        get() = artistSearchCache.isSearching
+        set(value) {
+            artistSearchCache.isSearching = value
+        }
 
     var artistSearchQuery : String
         get() = artistSearchCache.lastSearchQuery
@@ -44,9 +37,9 @@ object DataRepository {
         set(value) {
             artistSearchCache.pendingQuery = value
         }
+    //endregion
 
-
-    //functions
+    //region functions for artist search
     suspend fun searchForArtists(
         connectivityChecker: ConnectivityChecker,
         searchQuery : String,
@@ -87,14 +80,9 @@ object DataRepository {
     }
 
     suspend fun lastArtistSearchResult() : DataRepositoryResponse<List<ArtistSearchResult>,Throwable>
-        = coroutineScope{
+            = coroutineScope{
         val cachedDef = async(Dispatchers.IO){ artistSearchCache.lastSearchResult() }
         return@coroutineScope DataRepositoryResponse.Data(cachedDef.await())
     }
-
-}
-
-sealed class DataRepositoryResponse<out D, out E>{
-    data class Data<T>(val value : T) : DataRepositoryResponse<T,Nothing>()
-    data class Error(val error : Throwable) : DataRepositoryResponse<Nothing,Throwable>()
+    //endregion
 }
