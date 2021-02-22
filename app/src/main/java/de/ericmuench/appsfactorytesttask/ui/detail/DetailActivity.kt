@@ -132,7 +132,7 @@ abstract class DetailActivity : BaseActivity() {
         btnMoreDetail.isEnabled = isEnabled
     }
 
-    protected fun <VH: RecyclerView.ViewHolder> setRecyclerViewAdapter(adapter: RecyclerView.Adapter<VH>){
+    protected fun <VH: RecyclerView.ViewHolder> setRecyclerViewAdapter(adapter: RecyclerView.Adapter<VH>?){
         viewBinding.recyclerViewDataDetail.adapter = adapter
     }
 

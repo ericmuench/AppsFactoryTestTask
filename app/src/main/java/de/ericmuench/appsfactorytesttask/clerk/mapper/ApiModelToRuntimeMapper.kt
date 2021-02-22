@@ -6,10 +6,8 @@ import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.ArtistSearchR
 import de.ericmuench.appsfactorytesttask.model.lastfm.image.ImageFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.SearchedArtistFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.error.ErrorFromLastFm
-import de.ericmuench.appsfactorytesttask.model.runtime.Album
-import de.ericmuench.appsfactorytesttask.model.runtime.Artist
-import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
-import de.ericmuench.appsfactorytesttask.model.runtime.Song
+import de.ericmuench.appsfactorytesttask.model.lastfm.topalbums.TopAlbumsFromLastFm
+import de.ericmuench.appsfactorytesttask.model.runtime.*
 import java.util.*
 
 /**
@@ -44,18 +42,29 @@ class ApiModelToRuntimeMapper {
     //endregion
 
     //region functions for albums
-    fun mapAlbumInfo(apiAlbumInfo : AlbumInfoFromLastFm) : Album {
+    fun mapAlbumInfo(apiAlbumInfo : AlbumInfoFromLastFm, artistName: String) : Album {
         return Album(
             mbid = apiAlbumInfo.album.mbid,
             title = apiAlbumInfo.album.name,
-            description = apiAlbumInfo.album.wiki.summary,
+            description = apiAlbumInfo.album.wiki?.summary ?: "",
             imgUrl = getImageUrlFromLastFmImageList("extralarge",apiAlbumInfo.album.image),
             onlineUrl = apiAlbumInfo.album.url,
+            artistName = artistName,
             songs = apiAlbumInfo.album.tracks.track.map {
                 Song(it.name,it.url)
             }
         )
     }
+
+    fun mapTopAlbumsResult(
+        apiTopAlbums : TopAlbumsFromLastFm,
+        albums : List<Album> = emptyList()
+    ) : TopAlbumOfArtistResult = TopAlbumOfArtistResult(
+        albums= albums,
+        page = apiTopAlbums.topalbums.attr.page.toInt(),
+        totalPages = apiTopAlbums.topalbums.attr.totalPages.toInt(),
+        perPage = albums.size
+    )
     //endregion
 
     //region functions for Artists

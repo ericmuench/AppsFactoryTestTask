@@ -6,7 +6,9 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_SEARCH_ARTIST_TO_ARTIST_DETAIL_TRANSFERRED_ARTIST
+import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.viewmodel.ArtistDetailViewModel
 
@@ -15,48 +17,11 @@ class ArtistDetailActivity : DetailActivity() {
 
     //region fields
     private val viewModel : ArtistDetailViewModel by viewModels()
+    private var recyclerViewAdapter : GenericSimpleItemAdapter<Album>? = null
     //endregion
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        /*title = "Hallo Welt"
-        setDescriptionHeadline("Hallo Description Headline")
-        setDescription("Lorem ipsum")
-        setDataHeadline("Hallo Data Headline")
-
-        setMoreButtonOnClickListener {
-            if(testVisibility){
-                hideFabAction()
-                hideDescriptionProgressBar()
-                hideDataProgressBar()
-            }
-            else{
-                showFabAction()
-                showDataProgressBar()
-                showDescriptionProgressBar()
-            }
-            testVisibility = !testVisibility
-        }
-
-        val dummy = List(20){"Item ${it+1}"}
-        val adapter = GenericSimpleItemAdapter<String>(this,dummy)
-            .onApplyDataToViewHolder { holder, str, _ ->
-                holder.txtText.text = str
-            }
-
-        setRecyclerViewAdapter(adapter)
-
-
-
-        //val draw = ResourcesCompat.getDrawable(resources,R.drawable.ic_album,null)
-        //imgViewDetail.setImageDrawable(draw)
-
-        setFabActionOnClickListener {
-            Toast.makeText(this,"MORE!",Toast.LENGTH_SHORT).show()
-            adapter.addElements(List(5){"Item ${it+1+adapter.itemCount}"})
-        }
-        setFabActionIconDrawable(ResourcesCompat.getDrawable(resources,R.drawable.ic_search,null))*/
 
         //layout setup
         setupLayout()
@@ -68,8 +33,6 @@ class ArtistDetailActivity : DetailActivity() {
         handleIntentData()
     }
 
-
-
     //region Functions for setup Layout
     private fun setupLayout(){
         setupHeadlines()
@@ -79,6 +42,15 @@ class ArtistDetailActivity : DetailActivity() {
         setMoreButtonOnClickListener {
             viewModel.detailData.value?.onlineUrl.notNull { link -> openWebUrl(link) }
         }
+
+        //recyclerView-Adapter
+        recyclerViewAdapter = GenericSimpleItemAdapter<Album>(this,viewModel.allTopAlbums)
+            .onApplyDataToViewHolder { holder, album, idx ->
+                //TODO: Maybe switch checkbox to image button later
+                holder.checkBox.setButtonDrawable(R.drawable.item_stored_selector)
+                holder.txtText.text = album.title
+            }
+        setRecyclerViewAdapter(recyclerViewAdapter)
     }
 
     /**This function sets up the headlines. They are constant for a subclass of DetailActivity*/
@@ -93,8 +65,10 @@ class ArtistDetailActivity : DetailActivity() {
         viewModel.detailData.observe(this){ artistData ->
             artistData.notNull { artist ->
                 title = artist.artistName
-                setDescription(artist.description)
-                //TODO: Recyclerview Data
+                val description = artist
+                    .description
+                    .takeIf { it.isNotBlank() } ?: resources.getString(R.string.no_album_description)
+                setDescription(description)
                 //TODO: Handle Image with glide
             }
 
@@ -102,9 +76,21 @@ class ArtistDetailActivity : DetailActivity() {
             setMoreButtonIsEnabled(onlineUrlAvailable)
         }
 
+        viewModel.topAlbumResults.observe(this){
+            recyclerViewAdapter.notNull { recAdapter ->
+                val allTopAlbums = viewModel.allTopAlbums
+                if(recAdapter.itemCount < allTopAlbums.size){
+                    //add data
+                    recAdapter.addElements(allTopAlbums.subList(recAdapter.itemCount,allTopAlbums.size))
+                }
+                else if(recAdapter.itemCount > allTopAlbums.size){
+                    //TODO: Remove/Reassign data
+                }
+            }
+        }
+
     }
     //endregion
-
 
     // region help functions
     /**
@@ -124,7 +110,6 @@ class ArtistDetailActivity : DetailActivity() {
                 viewModel.loadData{ handleError(it) }
                 //TODO: Start loading data
             }
-
         }
         else{
             finish()

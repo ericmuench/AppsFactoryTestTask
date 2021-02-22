@@ -14,4 +14,5 @@
     <string name="navigate_back">Navigate Back</string>
     <string name="about_artist">About the Artist</string>
     <string name="about_album">About the Album</string>
+    <string name="no_album_description">No Album Description available.</string>
 </resources>

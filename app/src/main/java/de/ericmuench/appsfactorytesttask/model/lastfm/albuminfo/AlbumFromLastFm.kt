@@ -24,5 +24,5 @@ data class AlbumFromLastFm(
     @SerializedName("url")
     val url: String,
     @SerializedName("wiki")
-    val wiki: WikiFromLastFm
+    val wiki: WikiFromLastFm?
 )

@@ -33,6 +33,12 @@ class SearchArtistFragment : BaseFragment() {
     private val viewModel : SearchArtistViewModel by viewModels()
 
     private var recyclerViewAdapter : GenericSimpleItemAdapter<Artist>? = null
+    private val recyclerViewPositionDetector = RecyclerViewPositionDetector().apply {
+        onEndReached = {
+            viewModel.loadMoreSearchData(ConnectivityChecker()){ handleError(it)}
+        }
+    }
+
     private var searchViewItem : SearchView? = null
     //endregion
 
@@ -47,7 +53,7 @@ class SearchArtistFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupRecyclerView()
+        setupRecyclerViewBasics()
         setupViewModel()
     }
 
@@ -73,6 +79,11 @@ class SearchArtistFragment : BaseFragment() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewBinding.recyclerviewSearchArtist.addOnScrollListener(recyclerViewPositionDetector)
+    }
+
     override fun onStop() {
         super.onStop()
         viewBinding.recyclerviewSearchArtist.clearOnScrollListeners()
@@ -81,20 +92,16 @@ class SearchArtistFragment : BaseFragment() {
 
     //region help functions for Layout setup
     /**
-     * This function sets up all components that are related to the recyclerview of this Fragment
-     * displaying the Search-Result for artists.
+     * This function sets up all basic components that are related to the recyclerview of this Fragment
+     * displaying the Search-Result for artists. The only aspect that is necessary to be set up later
+     * is the scroll listener given that it needs to be removed in onStop.
      */
-    private fun setupRecyclerView() = with(viewBinding){
+    private fun setupRecyclerViewBasics() = with(viewBinding){
         activity.notNull { act ->
             recyclerviewSearchArtist.layoutManager = if(act.runsInLandscape()) GridLayoutManager(act,2) else LinearLayoutManager(act)
             recyclerViewAdapter = GenericSimpleItemAdapter(act, emptyList<Artist>())
                 .onApplyDataToViewHolder { holder, artist, _ ->
                     holder.txtText.text = artist.artistName
-                    //TODO: Remove this comment
-                    /*holder.checkBox.setButtonDrawable(R.drawable.item_stored_selector)
-                    holder.checkBox.setOnCheckedChangeListener { box, checked ->
-                        println("value of $str is now $checked")
-                    }*/
                     holder.checkBox.visibility = View.INVISIBLE
                     holder.cardView.setOnClickListener {
                         println("${artist.artistName} was clicked")
@@ -108,13 +115,7 @@ class SearchArtistFragment : BaseFragment() {
                     }
                 }
             recyclerviewSearchArtist.adapter = recyclerViewAdapter
-
-            val positionDetector = RecyclerViewPositionDetector().apply {
-                onEndReached = {
-                    viewModel.loadMoreSearchData(ConnectivityChecker())
-                }
-            }
-            recyclerviewSearchArtist.addOnScrollListener(positionDetector)
+            println("SearchArtistFragment: Added Scrolllistener to Recyclerview")
         }
     }
 

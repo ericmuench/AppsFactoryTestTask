@@ -28,9 +28,9 @@ class GsonPropertyChecker {
      * */
     fun <T : Any> jsonObjectContainsAllPropertiesOf(clazz: KClass<T>, json: String) : Boolean{
         //Note: fields contains ONLY public properties
-        val clazzPropertyNames = clazz.java.declaredFields.mapNotNull { it?.name }.also { println(it) }
+        val clazzPropertyNames = clazz.java.declaredFields.mapNotNull { it?.name }
         val gsonPropertyNames =
-            clazz.java.declaredFields.mapNotNull { it?.getAnnotation(SerializedName::class.java)?.value }.also { println(it) }
+            clazz.java.declaredFields.mapNotNull { it?.getAnnotation(SerializedName::class.java)?.value }
         return try {
             val jsonObject = JSONObject(json)
             jsonObject

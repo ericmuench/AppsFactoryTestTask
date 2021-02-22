@@ -3,6 +3,7 @@ package de.ericmuench.appsfactorytesttask.model.runtime.repository
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
+import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
 import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
 import kotlinx.coroutines.coroutineScope
 
@@ -66,13 +67,24 @@ object DataRepository {
 
     //region functions for runtime access to artists
     /**See Documentation for this function in RuntimeRepository*/
-    suspend fun getArtistByMbid(
+    suspend fun getArtistByName(
         connectivityChecker: ConnectivityChecker,
         mbid: String,
         shouldIgnoreRuntimeCache : Boolean = false
     ) : DataRepositoryResponse<Artist,Throwable> = coroutineScope{
         return@coroutineScope runtimeRepository
-            .getArtistByMbid(connectivityChecker,mbid,shouldIgnoreRuntimeCache)
+            .getArtistByName(connectivityChecker,mbid,shouldIgnoreRuntimeCache)
+    }
+
+    /**See Documentation for this function in RuntimeRepository*/
+    suspend fun getTopAlbumsByArtistName(
+        connectivityChecker: ConnectivityChecker,
+        artistName: String,
+        startPage : Int = 1,
+        limitPerPage : Int = 10,
+    ): DataRepositoryResponse<TopAlbumOfArtistResult,Throwable> = coroutineScope{
+        return@coroutineScope runtimeRepository
+            .getTopAlbumsByArtistName(connectivityChecker,artistName, startPage, limitPerPage)
     }
     //endregion
 
