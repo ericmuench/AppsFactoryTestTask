@@ -26,12 +26,18 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/checkbox_generic_simple_item"
+            app:layout_constraintEnd_toStartOf="@+id/img_btn_generic_simple_item"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <CheckBox
-            android:id="@+id/checkbox_generic_simple_item"
+        <ImageButton
+            android:clickable="true"
+            android:focusable="true"
+            android:tint="?attr/colorControlNormal"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_clear_all"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:id="@+id/img_btn_generic_simple_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"

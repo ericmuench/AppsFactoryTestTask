@@ -102,7 +102,7 @@ class SearchArtistFragment : BaseFragment() {
             recyclerViewAdapter = GenericSimpleItemAdapter(act, emptyList<Artist>())
                 .onApplyDataToViewHolder { holder, artist, _ ->
                     holder.txtText.text = artist.artistName
-                    holder.checkBox.visibility = View.INVISIBLE
+                    holder.imageButton.visibility = View.INVISIBLE
                     holder.cardView.setOnClickListener {
                         //TODO: Open detail page for artist (top album overview)
                         switchToActivity<ArtistDetailActivity>(){

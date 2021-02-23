@@ -2,12 +2,12 @@ package de.ericmuench.appsfactorytesttask.ui.detail
 
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.core.content.res.ResourcesCompat
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_SEARCH_ARTIST_TO_ARTIST_DETAIL_TRANSFERRED_ARTIST
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
-import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.RecyclerViewScrollPositionDetector
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.scrolling.NestedScrollViewPositionDetector
 import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
@@ -60,8 +60,18 @@ class ArtistDetailActivity : DetailActivity() {
         //recyclerView-Adapter
         recyclerViewAdapter = GenericSimpleItemAdapter<Album>(this,viewModel.allTopAlbums)
             .onApplyDataToViewHolder { holder, album, idx ->
-                //TODO: Maybe switch checkbox to image button later
-                holder.checkBox.setButtonDrawable(R.drawable.item_stored_selector)
+                val drawableStore = ResourcesCompat.getDrawable(resources,R.drawable.ic_save,null)
+                val drawableUnStore = ResourcesCompat.getDrawable(resources,R.drawable.ic_remove_circle,null)
+                holder.imageButton.setImageDrawable(drawableStore)
+                holder.imageButton.setOnClickListener {
+                    //TODO: Change action
+                    if(holder.imageButton.drawable == drawableStore){
+                        holder.imageButton.setImageDrawable(drawableUnStore)
+                        return@setOnClickListener
+                    }
+
+                    holder.imageButton.setImageDrawable(drawableStore)
+                }
                 holder.txtText.text = album.title
             }
         recyclerView.adapter = recyclerViewAdapter
