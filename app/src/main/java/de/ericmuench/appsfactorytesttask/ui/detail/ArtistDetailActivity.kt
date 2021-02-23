@@ -11,6 +11,7 @@ import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.RecyclerVi
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.scrolling.NestedScrollViewPositionDetector
 import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
+import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.ArtistDetailViewModel
 
 
@@ -44,6 +45,7 @@ class ArtistDetailActivity : DetailActivity() {
     private fun setupSpecificLayout(){
         setupHeadlines()
         hideFabAction()
+        hideAllProgressbars()
 
         //more btn
         setMoreButtonOnClickListener {
@@ -98,6 +100,30 @@ class ArtistDetailActivity : DetailActivity() {
                 }
                 else if(recAdapter.itemCount > allTopAlbums.size){
                     //TODO: Remove/Reassign data
+                }
+            }
+        }
+
+        viewModel.detailLoadingState.observe(this){ detailLoadingStateData ->
+            detailLoadingStateData.notNull {
+                setDescriptionLoading(it.isLoading)
+            }
+        }
+
+        viewModel.albumsLoadingState.observe(this){ albumsLoadingStateData ->
+            albumsLoadingStateData.notNull {
+                if(!albumsLoadingStateData.isLoading){
+                    hideAllDataProgressBars()
+                    return@notNull
+                }
+
+                if (it == LoadingState.LOADING_MORE){
+                    hideDataProgressBar()
+                    showDataProgressBarBottom()
+                }
+                else{
+                    hideDataProgressBarBottom()
+                    showDataProgressBar()
                 }
             }
         }

@@ -2,6 +2,7 @@ package de.ericmuench.appsfactorytesttask.model.runtime.repository
 
 import com.github.kittinunf.result.Result
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
+import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
 import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
@@ -128,12 +129,17 @@ class RuntimeRepository(private val apiClient: LastFmApiClient){
         return@coroutineScope when(topAlbumsFromWebResult){
             is Result.Success -> {
                 val topAlbumsRes = topAlbumsFromWebResult.value
+                val distinctResultDef = async(Dispatchers.IO){
+                    eliminateTopAlbumDuplicates(topAlbumsRes,artistName)
+                }
+
+                val distinctResult = distinctResultDef.await()
                 launch(Dispatchers.IO){
-                    if(topAlbumsRes.albums.isNotEmpty()){
-                        addToTopAlbumResultRuntimeStorage(topAlbumsRes,artistName)
+                    if(distinctResult.albums.isNotEmpty()){
+                        addToTopAlbumResultRuntimeStorage(distinctResult,artistName)
                     }
                 }
-                DataRepositoryResponse.Data(topAlbumsRes)
+                DataRepositoryResponse.Data(distinctResult)
             }
             is Result.Failure -> {
                 topAlbumsFromWebResult.error.printStackTrace()
@@ -169,6 +175,28 @@ class RuntimeRepository(private val apiClient: LastFmApiClient){
                     }
                     .sortedBy { it.page }
         }
+    }
+
+    private fun eliminateTopAlbumDuplicates(
+        original : TopAlbumOfArtistResult,
+        artistName : String
+    ) : TopAlbumOfArtistResult{
+        val allAlbumNames = getAllTopAlbumsOfArtist(artistName).map { it.title }
+
+        val newAlbumsForResult = original.albums.filter { !allAlbumNames.contains(it.title) }
+
+        return TopAlbumOfArtistResult(
+            newAlbumsForResult,
+            original.page,
+            original.totalPages,
+            newAlbumsForResult.size)
+
+    }
+
+    private fun getAllTopAlbumsOfArtist(artistName : String) : List<Album>{
+        return topAlbumResultsRuntimeStorage[artistName]
+            ?.map { it.albums }
+            ?.flatten() ?: emptyList()
     }
     //endregion
 }

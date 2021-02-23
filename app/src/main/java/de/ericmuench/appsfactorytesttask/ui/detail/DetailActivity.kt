@@ -137,13 +137,30 @@ abstract class DetailActivity : BaseActivity() {
     protected val recyclerView : RecyclerView
     get() = viewBinding.recyclerViewDataDetail
 
+
+    protected fun setDescriptionLoading(isLoading : Boolean) = with(viewBinding){
+        if(isLoading){
+            showDescriptionProgressBar()
+            txtDescriptionDetail.visibility = View.GONE
+        }
+        else{
+            hideDescriptionProgressBar()
+            txtDescriptionDetail.visibility = View.VISIBLE
+        }
+    }
     protected fun hideDescriptionProgressBar() = viewBinding.progressDescriptionDetail.hide()
     protected fun showDescriptionProgressBar() = viewBinding.progressDescriptionDetail.show()
     protected fun hideDataProgressBar() = viewBinding.progressDataDetail.hide()
+    protected fun hideDataProgressBarBottom() = viewBinding.progressDataBottomDetail.hide()
+    protected fun showDataProgressBarBottom() = viewBinding.progressDataBottomDetail.show()
     protected fun showDataProgressBar() = viewBinding.progressDataDetail.show()
     protected fun hideAllProgressbars() {
-        hideDataProgressBar()
+        hideAllDataProgressBars()
         hideDescriptionProgressBar()
+    }
+    protected fun hideAllDataProgressBars(){
+        hideDataProgressBar()
+        hideDataProgressBarBottom()
     }
     //endregion
 

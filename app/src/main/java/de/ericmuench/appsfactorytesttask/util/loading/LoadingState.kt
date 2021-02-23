@@ -6,9 +6,10 @@ package de.ericmuench.appsfactorytesttask.util.loading
 enum class LoadingState {
     IDLE,
     LOADING,
-    RELOADING;
+    RELOADING,
+    LOADING_MORE;
 
     //fields
     val isLoading : Boolean
-    get() = this == LOADING || this == RELOADING
+    get() = this == LOADING || this == LOADING_MORE || this == RELOADING
 }

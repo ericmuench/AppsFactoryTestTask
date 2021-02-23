@@ -51,12 +51,14 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
                 }
 
                 launch {
+
                     _topAlbumResults.value = emptyList()
                     loadAlbumData(
                         connectivityChecker = conCheck,
                         onError = onError,
                         artistName = artist.artistName
                     )
+
                 }
             }
 
@@ -73,23 +75,29 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
             val existingResults = topAlbumResults.value
             if(existingResults != null && existingResults.isNotEmpty()){
                 val lastPage = existingResults.last().page
-                loadAlbumData(
-                    connectivityChecker = conCheck,
-                    onError = onError,
-                    artistName = artist.artistName,
-                    startPage = lastPage + 1
-                )
+
+                if(lastPage <= existingResults.last().totalPages){
+                    println("Loading page ${lastPage + 1}")
+                    loadAlbumData(
+                        connectivityChecker = conCheck,
+                        onError = onError,
+                        artistName = artist.artistName,
+                        startPage = lastPage + 1,
+                        loadMode = LoadingState.LOADING_MORE
+                    )
+                }
             }
         }
     }
     //endregion
 
-    //region Data Loasing Functions
+    //region Data Loading Functions
     private suspend fun loadAlbumData(
         connectivityChecker: ConnectivityChecker,
         artistName: String,
         startPage: Int = 1,
         limitPerPage: Int = 10,
+        loadMode : LoadingState = LoadingState.LOADING,
         onError: (Throwable) -> Unit = {}
     ) = coroutineScope{
         val albumsLoading = albumsLoadingState.value ?: LoadingState.IDLE
@@ -97,7 +105,8 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
             return@coroutineScope
         }
 
-        _albumsLoadingState.value = LoadingState.LOADING
+        _albumsLoadingState.value = loadMode
+
         val topAlbumsResponseDef = async(Dispatchers.IO){
             DataRepository.getTopAlbumsByArtistName(
                 connectivityChecker, artistName, startPage, limitPerPage

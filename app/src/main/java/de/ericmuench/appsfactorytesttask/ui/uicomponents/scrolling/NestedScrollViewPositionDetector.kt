@@ -21,7 +21,6 @@ class NestedScrollViewPositionDetector : ScrollPositionDetector, NestedScrollVie
         oldScrollX: Int,
         oldScrollY: Int
     ) {
-        println("On Scroll change")
         v.notNull { nestedScrollView ->
 
             //calculation was made possible by this tutorial:
@@ -29,7 +28,7 @@ class NestedScrollViewPositionDetector : ScrollPositionDetector, NestedScrollVie
             val view: View = nestedScrollView.getChildAt(nestedScrollView.childCount - 1)
             val bottomDetector: Int =
                 view.bottom - (nestedScrollView.height + nestedScrollView.scrollY)
-            if (bottomDetector == 0) {
+            if (bottomDetector <= 10) {
                 notifyEndReached()
             }
         }

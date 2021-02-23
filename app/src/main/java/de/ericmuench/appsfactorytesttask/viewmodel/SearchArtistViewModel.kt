@@ -73,7 +73,7 @@ class SearchArtistViewModel : ViewModel() {
     ) = viewModelScope.launch{
         _searchedArtistsResultChunks.value.notNullSuspending { currentResults ->
             if(currentResults.isNotEmpty()){
-                _loadingState.value = LoadingState.RELOADING
+                _loadingState.value = LoadingState.LOADING_MORE
                 val page = currentResults.last().startPage + 1
                 val job = launch { loadData(connectivityChecker,onError,page) }
                 job.join()

@@ -107,7 +107,6 @@
             <androidx.core.widget.ContentLoadingProgressBar
                 android:id="@+id/progress_description_detail"
                 style="?android:attr/progressBarStyle"
-                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -164,7 +163,6 @@
 
             <androidx.core.widget.ContentLoadingProgressBar
                 android:id="@+id/progress_data_detail"
-                android:visibility="gone"
                 style="?android:attr/progressBarStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -197,7 +195,6 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="8dp"
                 android:indeterminateTint="?attr/colorPrimary"
-                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

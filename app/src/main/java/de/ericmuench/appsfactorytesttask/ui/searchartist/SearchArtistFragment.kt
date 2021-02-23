@@ -35,7 +35,6 @@ class SearchArtistFragment : BaseFragment() {
     private var recyclerViewAdapter : GenericSimpleItemAdapter<Artist>? = null
     private val recyclerViewPositionDetector = RecyclerViewScrollPositionDetector().apply {
         onEndReached = {
-            println("Search Artist Fragment: Detected End of Recyclerview")
             viewModel.loadMoreSearchData(ConnectivityChecker()){ handleError(it)}
         }
     }
@@ -105,7 +104,6 @@ class SearchArtistFragment : BaseFragment() {
                     holder.txtText.text = artist.artistName
                     holder.checkBox.visibility = View.INVISIBLE
                     holder.cardView.setOnClickListener {
-                        println("${artist.artistName} was clicked")
                         //TODO: Open detail page for artist (top album overview)
                         switchToActivity<ArtistDetailActivity>(){
                             putExtra(
@@ -116,7 +114,6 @@ class SearchArtistFragment : BaseFragment() {
                     }
                 }
             recyclerviewSearchArtist.adapter = recyclerViewAdapter
-            println("SearchArtistFragment: Added Scrolllistener to Recyclerview")
         }
     }
 
@@ -211,7 +208,7 @@ class SearchArtistFragment : BaseFragment() {
                        viewBinding.progressTopSearchArtist.show()
                        viewBinding.progressBottomSearchArtist.hide()
                    }
-                   LoadingState.RELOADING -> {
+                   LoadingState.LOADING_MORE -> {
                        viewBinding.progressTopSearchArtist.hide()
                        viewBinding.progressBottomSearchArtist.show()
                    }
