@@ -1,19 +1,15 @@
 package de.ericmuench.appsfactorytesttask.ui.detail
 
 import android.graphics.drawable.Drawable
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.Html
 import android.text.method.LinkMovementMethod
-import android.view.MenuItem
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import androidx.core.text.HtmlCompat
+import androidx.core.view.ViewCompat
+import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.databinding.ActivityDetailBinding
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseActivity
 import de.ericmuench.appsfactorytesttask.util.extensions.runsInLandscape
@@ -56,7 +52,7 @@ abstract class DetailActivity : BaseActivity() {
         }
     }
 
-    private fun setupRecyclerView() = with(viewBinding){
+    protected open fun setupRecyclerView() = with(viewBinding){
         recyclerViewDataDetail.layoutManager = LinearLayoutManager(this@DetailActivity)
     }
 
@@ -77,8 +73,14 @@ abstract class DetailActivity : BaseActivity() {
         collapsingToolbarLayoutDetail?.title = title
     }
 
-    val imgViewDetail : ImageView
+    protected val imgViewDetail : ImageView
     get() = viewBinding.imgDetail
+
+    protected fun setNestedScrollViewOnScrollStateChangeListener(
+        listener : NestedScrollView.OnScrollChangeListener
+    ) = with(viewBinding){
+        nestedscrollviewDetail.setOnScrollChangeListener(listener)
+    }
 
     protected fun setFabActionOnClickListener(listener: (View?) -> Unit) = with(viewBinding){
         if(runsInLandscape()){
@@ -132,9 +134,8 @@ abstract class DetailActivity : BaseActivity() {
         btnMoreDetail.isEnabled = isEnabled
     }
 
-    protected fun <VH: RecyclerView.ViewHolder> setRecyclerViewAdapter(adapter: RecyclerView.Adapter<VH>?){
-        viewBinding.recyclerViewDataDetail.adapter = adapter
-    }
+    protected val recyclerView : RecyclerView
+    get() = viewBinding.recyclerViewDataDetail
 
     protected fun hideDescriptionProgressBar() = viewBinding.progressDescriptionDetail.hide()
     protected fun showDescriptionProgressBar() = viewBinding.progressDescriptionDetail.show()

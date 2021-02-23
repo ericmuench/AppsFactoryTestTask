@@ -2,6 +2,7 @@ package de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.scrolling.ScrollPositionDetector
 import de.ericmuench.appsfactorytesttask.util.extensions.castedAs
 import de.ericmuench.appsfactorytesttask.util.extensions.lastItemIndex
 
@@ -14,7 +15,7 @@ import de.ericmuench.appsfactorytesttask.util.extensions.lastItemIndex
  * CAUTION: This class only works with a LinearLayoutManager or with other LayoutManagers that
  * inherit from LinearLayoutManager.
  */
-class RecyclerViewPositionDetector : RecyclerView.OnScrollListener() {
+class RecyclerViewScrollPositionDetector : RecyclerView.OnScrollListener(), ScrollPositionDetector {
 
     //Events
     /**This functional type field is triggered if the end of the recyclerview is reached by scrolling*/
@@ -27,11 +28,16 @@ class RecyclerViewPositionDetector : RecyclerView.OnScrollListener() {
         recyclerView.layoutManager.castedAs<LinearLayoutManager> { layoutManager ->
             val adapter = recyclerView.adapter  ?: return@castedAs
 
-            if (isEndPosition(layoutManager,newState,adapter)) {
-                onEndReached.invoke()
+            if (isEndPosition(recyclerView,layoutManager,newState,adapter)) {
+                notifyEndReached()
             }
         }
     }
+
+    //region Interface Functions
+    override fun notifyEndReached() = onEndReached.invoke()
+
+    //endregion
 
     //Help Functions
     /**
@@ -45,11 +51,18 @@ class RecyclerViewPositionDetector : RecyclerView.OnScrollListener() {
      * @return Whether the endof the RecyclerView is reached
      */
     private fun isEndPosition(
+            recyclerView: RecyclerView,
             layoutManager: LinearLayoutManager,
             scrollState: Int,
             adapter: RecyclerView.Adapter<RecyclerView.ViewHolder>
     ) : Boolean{
         val adapterLastIndex = adapter.lastItemIndex().takeIf { it >= 0 } ?: return false
-        return layoutManager.findLastCompletelyVisibleItemPosition() == adapterLastIndex
+        val lastLayoutManagerPosition = layoutManager.findLastCompletelyVisibleItemPosition()
+        println("debug: Last Adapter Item Index is: $adapterLastIndex. Last Position is: ${lastLayoutManagerPosition}")
+        //return lastLayoutManagerPosition == adapterLastIndex
+        val lastView = recyclerView.findViewHolderForAdapterPosition(adapterLastIndex)?.itemView ?: return false
+        val result = layoutManager.isViewPartiallyVisible(lastView,true,true)
+        println("debug: Is End Position: $result")
+        return result
     }
 }

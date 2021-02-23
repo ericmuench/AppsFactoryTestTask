@@ -80,8 +80,8 @@ object DataRepository {
     suspend fun getTopAlbumsByArtistName(
         connectivityChecker: ConnectivityChecker,
         artistName: String,
-        startPage : Int = 1,
-        limitPerPage : Int = 10,
+        startPage : Int,
+        limitPerPage : Int,
     ): DataRepositoryResponse<TopAlbumOfArtistResult,Throwable> = coroutineScope{
         return@coroutineScope runtimeRepository
             .getTopAlbumsByArtistName(connectivityChecker,artistName, startPage, limitPerPage)

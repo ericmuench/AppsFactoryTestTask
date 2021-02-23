@@ -1,7 +1,5 @@
 package de.ericmuench.appsfactorytesttask.ui.detail
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.viewModels
 import de.ericmuench.appsfactorytesttask.R
@@ -9,6 +7,9 @@ import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_SEARCH_ARTIST_
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.RecyclerViewScrollPositionDetector
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.scrolling.NestedScrollViewPositionDetector
+import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.viewmodel.ArtistDetailViewModel
 
@@ -18,13 +19,18 @@ class ArtistDetailActivity : DetailActivity() {
     //region fields
     private val viewModel : ArtistDetailViewModel by viewModels()
     private var recyclerViewAdapter : GenericSimpleItemAdapter<Album>? = null
+    private val scrollViewPositionDetector = NestedScrollViewPositionDetector().apply {
+        onEndReached = {
+            viewModel.loadMoreAlbumData(ConnectivityChecker()){ handleError(it)}
+        }
+    }
     //endregion
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         //layout setup
-        setupLayout()
+        setupSpecificLayout()
 
         //vm setup
         setupViewModel()
@@ -34,7 +40,8 @@ class ArtistDetailActivity : DetailActivity() {
     }
 
     //region Functions for setup Layout
-    private fun setupLayout(){
+    /**This function assigns specific values for Artist-Details to UI-Fields*/
+    private fun setupSpecificLayout(){
         setupHeadlines()
         hideFabAction()
 
@@ -43,6 +50,11 @@ class ArtistDetailActivity : DetailActivity() {
             viewModel.detailData.value?.onlineUrl.notNull { link -> openWebUrl(link) }
         }
 
+        setNestedScrollViewOnScrollStateChangeListener(scrollViewPositionDetector)
+    }
+
+    override fun setupRecyclerView() {
+        super.setupRecyclerView()
         //recyclerView-Adapter
         recyclerViewAdapter = GenericSimpleItemAdapter<Album>(this,viewModel.allTopAlbums)
             .onApplyDataToViewHolder { holder, album, idx ->
@@ -50,8 +62,9 @@ class ArtistDetailActivity : DetailActivity() {
                 holder.checkBox.setButtonDrawable(R.drawable.item_stored_selector)
                 holder.txtText.text = album.title
             }
-        setRecyclerViewAdapter(recyclerViewAdapter)
+        recyclerView.adapter = recyclerViewAdapter
     }
+
 
     /**This function sets up the headlines. They are constant for a subclass of DetailActivity*/
     private fun setupHeadlines(){
@@ -108,7 +121,6 @@ class ArtistDetailActivity : DetailActivity() {
             if(viewModel.detailData.value == null){
                 viewModel.initializeWithTransferredData(intentData)
                 viewModel.loadData{ handleError(it) }
-                //TODO: Start loading data
             }
         }
         else{

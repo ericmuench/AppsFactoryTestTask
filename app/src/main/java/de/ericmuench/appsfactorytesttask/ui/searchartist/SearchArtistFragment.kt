@@ -16,7 +16,7 @@ import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.ui.detail.ArtistDetailActivity
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseFragment
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
-import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.RecyclerViewPositionDetector
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.RecyclerViewScrollPositionDetector
 import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.*
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
@@ -33,8 +33,9 @@ class SearchArtistFragment : BaseFragment() {
     private val viewModel : SearchArtistViewModel by viewModels()
 
     private var recyclerViewAdapter : GenericSimpleItemAdapter<Artist>? = null
-    private val recyclerViewPositionDetector = RecyclerViewPositionDetector().apply {
+    private val recyclerViewPositionDetector = RecyclerViewScrollPositionDetector().apply {
         onEndReached = {
+            println("Search Artist Fragment: Detected End of Recyclerview")
             viewModel.loadMoreSearchData(ConnectivityChecker()){ handleError(it)}
         }
     }
