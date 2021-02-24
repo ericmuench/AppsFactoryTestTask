@@ -82,9 +82,10 @@ object DataRepository {
         artistName: String,
         startPage : Int,
         limitPerPage : Int,
+        shouldRefreshRuntimeCache : Boolean = false,
     ): DataRepositoryResponse<TopAlbumOfArtistResult,Throwable> = coroutineScope{
         return@coroutineScope runtimeRepository
-            .getTopAlbumsByArtistName(hasInternet,artistName, startPage, limitPerPage)
+            .getTopAlbumsByArtistName(hasInternet,artistName, startPage, limitPerPage,shouldRefreshRuntimeCache)
     }
     //endregion
 

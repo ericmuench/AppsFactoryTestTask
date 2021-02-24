@@ -3,15 +3,18 @@ package de.ericmuench.appsfactorytesttask.ui.detail
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import androidx.core.text.HtmlCompat
-import androidx.core.view.ViewCompat
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.databinding.ActivityDetailBinding
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseActivity
+import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.util.extensions.runsInLandscape
 
 /**
@@ -22,6 +25,9 @@ abstract class DetailActivity : BaseActivity() {
 
     //region fields
     private lateinit var viewBinding : ActivityDetailBinding
+
+    private val menuItems = mutableListOf<MenuItem>()
+    private var onReloadButtonClicked : () -> Unit = {}
     //endregion
 
     //region lifecycle functions
@@ -37,6 +43,27 @@ abstract class DetailActivity : BaseActivity() {
         setupDescriptionTextView()
         setupRecyclerView()
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.detail_actionbar_menu,menu)
+        //assign menu items
+        menu?.findItem(R.id.acbar_item_reload_detail)?.notNull {
+            menuItems.add(it)
+        }
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            R.id.acbar_item_reload_detail -> {
+                onReloadButtonClicked.invoke()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+
+    }
+
     //endregion
 
 
@@ -50,6 +77,36 @@ abstract class DetailActivity : BaseActivity() {
         imgBtnBackDetailLand?.setOnClickListener{
             onActionbarBackButtonPressed()
         }
+    }
+
+    protected fun setOptionMenuVisibility(shouldBeVisible : Boolean) = with(viewBinding){
+        if(shouldBeVisible){
+            if(runsInLandscape()){
+                imgBtnMenuReloadSubstituteLand?.visibility = View.VISIBLE
+            }
+            else{
+                menuItems.forEach {
+                    it.isVisible = true
+                }
+            }
+        }
+        else{
+            if(runsInLandscape()){
+                imgBtnMenuReloadSubstituteLand?.visibility = View.INVISIBLE
+            }
+            else{
+                menuItems.forEach {
+                    it.isVisible = false
+                }
+            }
+        }
+    }
+
+    protected fun setOnReloadButtonClickListener(listener: () -> Unit) = with(viewBinding){
+        imgBtnMenuReloadSubstituteLand?.setOnClickListener {
+            listener.invoke()
+        }
+        onReloadButtonClicked = listener
     }
 
     protected open fun setupRecyclerView() = with(viewBinding){
@@ -100,7 +157,7 @@ abstract class DetailActivity : BaseActivity() {
 
     protected fun hideFabAction()= with(viewBinding){
         if(runsInLandscape()){
-            imgBtnFabSubstituteLand?.visibility = View.INVISIBLE
+            imgBtnFabSubstituteLand?.visibility = View.GONE
         }
 
         fabDetail?.visibility = View.GONE
@@ -136,7 +193,6 @@ abstract class DetailActivity : BaseActivity() {
 
     protected val recyclerView : RecyclerView
     get() = viewBinding.recyclerViewDataDetail
-
 
     protected fun setDescriptionLoading(isLoading : Boolean) = with(viewBinding){
         if(isLoading){

@@ -98,8 +98,13 @@ class RuntimeRepository(private val apiClient: LastFmApiClient){
         artistName: String,
         startPage : Int,
         limitPerPage : Int,
+        shouldRefreshRuntimeCache : Boolean,
     ): DataRepositoryResponse<TopAlbumOfArtistResult,Throwable> = coroutineScope{
         //looking for cached result
+        if(shouldRefreshRuntimeCache){
+            topAlbumResultsRuntimeStorage.remove(artistName)
+        }
+
         val cachedResult = topAlbumResultsRuntimeStorage[artistName]
         if(cachedResult != null && cachedResult.isNotEmpty()){
             val cachedPageDef = async(Dispatchers.IO){ cachedResult.find { it.page == startPage } }

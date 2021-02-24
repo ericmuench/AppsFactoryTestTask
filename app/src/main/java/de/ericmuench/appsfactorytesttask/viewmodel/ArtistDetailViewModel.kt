@@ -45,7 +45,7 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
                 val artistLoadingState = detailLoadingState.value ?: LoadingState.IDLE
                 if(!artistLoadingState.isLoading){
                     launch {
-                        loadDetails(hasInternet, artist,onError)
+                        loadDetails(hasInternet, artist,LoadingState.LOADING,false,onError)
                     }
                 }
 
@@ -62,6 +62,30 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
         }
     }
 
+    fun reloadData(hasInternet: Boolean,onError: (Throwable) -> Unit = {}) {
+        viewModelScope.launch {
+            detailData.value.notNullSuspending {artist ->
+                val artistLoadingState = detailLoadingState.value ?: LoadingState.IDLE
+                if(!artistLoadingState.isLoading){
+                    launch {
+                        loadDetails(hasInternet, artist,LoadingState.RELOADING,true,onError)
+                    }
+                }
+
+                launch {
+                    _topAlbumResults.value = emptyList()
+                    loadAlbumData(
+                        hasInternet = hasInternet,
+                        onError = onError,
+                        artistName = artist.artistName,
+                        loadMode = LoadingState.RELOADING,
+                        shouldRefreshRuntimeCache = true
+                    )
+                }
+            }
+        }
+    }
+
 
     fun loadMoreAlbumData(
         hasInternet: Boolean,
@@ -73,7 +97,6 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
                 val lastPage = existingResults.last().page
 
                 if(lastPage <= existingResults.last().totalPages){
-                    println("Loading page ${lastPage + 1}")
                     loadAlbumData(
                         hasInternet = hasInternet,
                         onError = onError,
@@ -94,6 +117,7 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
         startPage: Int = 1,
         limitPerPage: Int = 10,
         loadMode : LoadingState = LoadingState.LOADING,
+        shouldRefreshRuntimeCache : Boolean = false,
         onError: (Throwable) -> Unit = {}
     ) = coroutineScope{
         val albumsLoading = albumsLoadingState.value ?: LoadingState.IDLE
@@ -104,7 +128,7 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
         _albumsLoadingState.value = loadMode
 
         val topAlbumsResponse = DataRepository.getTopAlbumsByArtistName(
-             hasInternet,artistName, startPage, limitPerPage
+             hasInternet,artistName, startPage, limitPerPage, shouldRefreshRuntimeCache
         )
         when(topAlbumsResponse){
             is DataRepositoryResponse.Data -> {
@@ -126,10 +150,17 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
     private suspend fun loadDetails(
         hasInternet: Boolean,
         artist : Artist,
+        loadMode : LoadingState = LoadingState.LOADING,
+        shouldIgnoreRuntimeCache : Boolean = false,
         onError: (Throwable) -> Unit = {}
     ){
-        _detailLoadingState.value = LoadingState.LOADING
-        val artistRepoResponse = DataRepository.getArtistByName(hasInternet,artist.artistName)
+        _detailLoadingState.value = loadMode
+        val artistRepoResponse = DataRepository.getArtistByName(
+            hasInternet,
+            artist.artistName,
+            shouldIgnoreRuntimeCache
+        )
+
         when(artistRepoResponse){
             is DataRepositoryResponse.Data -> {
                 setDetailDataValue(artistRepoResponse.value)

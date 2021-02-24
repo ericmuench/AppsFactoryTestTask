@@ -18,51 +18,21 @@ import java.net.InetSocketAddress
 import java.net.Socket
 
 /**
- * This class can check if the device is connected to Internet TODO : More Doc
+ * This class can check if the device is connected to Internet. For this it can be registered to a
+ * lifecycle as a Lifecycle-Observer registering a Network-Callback in OnCreate and OnDestroy. When
+ * the Network-State changes, it publishes the current State of the Network into the
+ * "internetConnectivityState"-Variable of Type InternetConnectivityState. The latter represents
+ * the current Internet-Connection-State.
  * */
 class InternetConnectivityChecker(
     context: Context
 ) : ConnectivityManager.NetworkCallback(), LifecycleObserver{
 
-    //private val contextRef : WeakReference<Context> = WeakReference(context.applicationContext)
     //region Fields
     private val contextRef = WeakReference(context)
     var internetConnectivityState : InternetConnectivityState = InternetConnectivityState.UNDETERMINED
         private set
 
-    //endregion
-
-    //region Functions
-    /**
-     * This function can check if the device is connected to internet. For that, ConnectivityManager
-     * is used.
-     *
-     * @param defaultForIndeterminable The default value that should be returned if Internet-
-     * Connection-State can not be determined.
-     *
-     * @return False if ConnectivityManager detects that Internet-Connection is not available,
-     * True if ConnectivityManager detects that Internet-Connection is available and
-     * defaultForIndeterminable if the Internet-Connection-State can not be determined.
-     *
-     * TODO: Maybe change to the Network-Callback-check later if there is time left
-     * */
-    @Deprecated("This function should not be used anymore due to its inefficency. " +
-            "Use internetConnectivityState instead")
-    suspend fun isConnectedToInternet(
-        defaultForIndeterminable : Boolean = true
-    ) : Boolean = coroutineScope{
-        return@coroutineScope withContext(Dispatchers.IO) {
-            try {
-                val socket = Socket()
-                socket.connect(InetSocketAddress("8.8.8.8",53),1500)
-                socket.close()
-                true
-            } catch (e: Exception) {
-                false
-            }
-
-        }
-    }
     //endregion
 
     //region Lifecycle-Observer Functions
@@ -106,8 +76,6 @@ class InternetConnectivityChecker(
         internetConnectivityState = InternetConnectivityState.DISCONNECTED
     }
     //endregion
-
-
 
     //region Enum for Connection State
     enum class InternetConnectivityState(val hasInternetConnection : Boolean){

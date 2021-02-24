@@ -1,6 +1,7 @@
 package de.ericmuench.appsfactorytesttask.ui.detail
 
 import android.os.Bundle
+import android.view.Menu
 import androidx.activity.viewModels
 import androidx.core.content.res.ResourcesCompat
 import de.ericmuench.appsfactorytesttask.R
@@ -9,11 +10,9 @@ import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.scrolling.NestedScrollViewPositionDetector
-import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.ArtistDetailViewModel
-import java.io.IOException
 
 
 class ArtistDetailActivity : DetailActivity() {
@@ -58,6 +57,15 @@ class ArtistDetailActivity : DetailActivity() {
         //more btn
         setMoreButtonOnClickListener {
             viewModel.detailData.value?.onlineUrl.notNull { link -> openWebUrl(link) }
+        }
+
+        //reload button
+        setOnReloadButtonClickListener {
+            val hasInternet = internetConnectivityChecker
+                .internetConnectivityState
+                .hasInternetConnection
+
+            viewModel.reloadData(hasInternet){ handleError(it) }
         }
 
         setNestedScrollViewOnScrollStateChangeListener(scrollViewPositionDetector)

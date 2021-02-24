@@ -80,10 +80,6 @@ class SearchArtistFragment : BaseFragment() {
                 requestSearchResultsClear()
                 true
             }
-            R.id.search_artist_acbar_item_test -> {
-                switchToActivity<ArtistDetailActivity>()
-                true
-            }
             else -> super.onOptionsItemSelected(item)
         }
     }
