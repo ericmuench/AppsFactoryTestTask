@@ -5,7 +5,7 @@ import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
-import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
+import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -40,7 +40,7 @@ class RuntimeRepository(private val apiClient: LastFmApiClient){
      * (as long as the Artist isn't already in the Runtime-Storages).
      * This loading is based on the mbid of the Artist.
      *
-     * @param connectivityChecker Checker-Class to check if Internet-Connectivity is available
+     * @param hasInternet whether Internet-Connectivity is available
      * @param name The name of the Artist to uniquely identify the Artist (Ids are not provided
      * by LastFM)
      * @param shouldIgnoreRuntimeCache Whether the current data in the Runtime-Storage should be
@@ -49,7 +49,7 @@ class RuntimeRepository(private val apiClient: LastFmApiClient){
      * @return A DataRepositoryResult containing the Artist with all its Properties or an Error
      * */
     suspend fun getArtistByName(
-        connectivityChecker: ConnectivityChecker,
+        hasInternet : Boolean,
         name: String,
         shouldIgnoreRuntimeCache : Boolean = false
     ) : DataRepositoryResponse<Artist,Throwable> = coroutineScope{
@@ -61,11 +61,12 @@ class RuntimeRepository(private val apiClient: LastFmApiClient){
                 return@coroutineScope DataRepositoryResponse.Data(dataFromStorage)
             }
         }
-        //Load data from web and store it into storage if internet connection is available
-        if(!hasInternetConnection(connectivityChecker)){
-            return@coroutineScope DataRepositoryResponse.Error(IOException("No internet Connection"))
+
+        if(!hasInternet){
+            return@coroutineScope DataRepositoryResponse.Error(IOException("No internet connection"))
         }
 
+        //Load data from web and store it into storage if internet connection is available
         val artistDataFromWebDeferred = async(Dispatchers.IO){ apiClient.getArtistByName(name) }
 
         when(val webResult = artistDataFromWebDeferred.await()){
@@ -84,7 +85,7 @@ class RuntimeRepository(private val apiClient: LastFmApiClient){
      * web using the API-Client. If data is loaded from the Web it is also cached in the
      * associated Runtime-Storage for Top-Albums.
      *
-     * @param connectivityChecker Checker-Class to check if Internet-Connectivity is available
+     * @param hasInternet whether Internet-Connectivity is available
      * @param artistName The name of the Artist to uniquely identify the Artist (Ids are not provided
      * by LastFM)
      * @param startPage The page to start with in the Result
@@ -93,7 +94,7 @@ class RuntimeRepository(private val apiClient: LastFmApiClient){
      *
      * */
     suspend fun getTopAlbumsByArtistName(
-        connectivityChecker: ConnectivityChecker,
+        hasInternet : Boolean,
         artistName: String,
         startPage : Int,
         limitPerPage : Int,
@@ -115,10 +116,8 @@ class RuntimeRepository(private val apiClient: LastFmApiClient){
             }
         }
 
-
-        //Load data from web and store it into storage if internet connection is available
-        if(!hasInternetConnection(connectivityChecker)){
-            return@coroutineScope DataRepositoryResponse.Error(IOException("No internet Connection"))
+        if(!hasInternet){
+            return@coroutineScope DataRepositoryResponse.Error(IOException("No internet connection"))
         }
 
         val topAlbumsResultFromWebDeferred = async(Dispatchers.IO){
@@ -150,13 +149,6 @@ class RuntimeRepository(private val apiClient: LastFmApiClient){
     //endregion
 
     //region help functions
-    private suspend fun hasInternetConnection(
-        connectivityChecker: ConnectivityChecker
-    ) : Boolean = coroutineScope{
-        val hasInternetConnectionDef = async { connectivityChecker.isConnectedToInternet() }
-        return@coroutineScope hasInternetConnectionDef.await()
-    }
-
     private suspend fun addToTopAlbumResultRuntimeStorage(
         topAlbumResult : TopAlbumOfArtistResult,
         artistName: String

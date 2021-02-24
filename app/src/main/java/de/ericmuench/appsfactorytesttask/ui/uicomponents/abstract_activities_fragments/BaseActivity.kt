@@ -2,10 +2,12 @@ package de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fr
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import de.ericmuench.appsfactorytesttask.R
+import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 
 /**
@@ -13,6 +15,21 @@ import de.ericmuench.appsfactorytesttask.util.extensions.notNull
  *
  * */
 abstract class BaseActivity : AppCompatActivity() {
+
+    //region Fields
+    lateinit var internetConnectivityChecker : InternetConnectivityChecker
+    //endregion
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        internetConnectivityChecker = InternetConnectivityChecker(this)
+        lifecycle.addObserver(internetConnectivityChecker)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        lifecycle.removeObserver(internetConnectivityChecker)
+    }
 
     //region lifecycle functions
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

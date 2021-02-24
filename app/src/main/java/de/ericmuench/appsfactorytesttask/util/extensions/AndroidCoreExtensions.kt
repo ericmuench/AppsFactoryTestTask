@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -18,7 +19,12 @@ import kotlin.reflect.KClass
  * This file contains helpful extensions for Android Components to reduce code e.g. in Activities.
  */
 
-//Activity extensions
+//region Context Extensions
+val Context.connectivityManager : ConnectivityManager?
+get() = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+//endregion
+
+//region Activity extensions
 /**
  * @return whether a Activity runs in portrait-mode
  */
@@ -93,8 +99,10 @@ fun Activity.hideKeyboard(){
         }
     }
 }
+//endregion
 
-//Fragment Extensions
+
+//region Fragment Extensions
 /**
  * This function can hide the Keyboard used by the fragment by calling the hideKeyboard-Function
  * of the underlying Activity.
@@ -138,8 +146,9 @@ inline fun <reified T : Activity> Fragment.switchToActivityForResult(
     }
 
 }
+//endregion
 
-//Concrete UI Components Extensions
+//region Concrete UI Components Extensions
 /**
  * This extension function makes the small line at the Bottom of the Edit-Text-Field of
  * a SearchView transparent.
@@ -154,3 +163,4 @@ fun SearchView.removeSearchPlate() {
  * adapter of a RecyclerView.
  * */
 fun <VH : RecyclerView.ViewHolder> RecyclerView.Adapter<VH>.lastItemIndex() : Int = itemCount - 1
+//endregion

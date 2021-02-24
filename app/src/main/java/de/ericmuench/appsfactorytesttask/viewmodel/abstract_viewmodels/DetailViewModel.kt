@@ -1,4 +1,4 @@
-package de.ericmuench.appsfactorytesttask.viewmodel
+package de.ericmuench.appsfactorytesttask.viewmodel.abstract_viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -37,12 +37,5 @@ abstract class DetailViewModel<T> : ViewModel() {
     protected fun setDetailDataValue(value : T){
         _detailData.value = value
     }
-    //endregion
-
-    //region abstract functions
-    /**
-     * This function is responsible for loading data
-     * */
-    abstract fun loadData(onError : (Throwable) -> Unit = {})
     //endregion
 }

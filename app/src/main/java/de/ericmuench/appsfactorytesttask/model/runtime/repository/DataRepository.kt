@@ -4,7 +4,7 @@ import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
-import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
+import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
 import kotlinx.coroutines.coroutineScope
 
 /**
@@ -50,13 +50,13 @@ object DataRepository {
 
     //region functions for artist search
     suspend fun searchForArtists(
-        connectivityChecker: ConnectivityChecker,
+        hasInternet : Boolean,
         searchQuery : String,
         startPage : Int = 1,
         limitPerPage : Int = 10
     ) : DataRepositoryResponse<ArtistSearchResult,Throwable> = coroutineScope{
         return@coroutineScope artistSearchRepository
-            .searchForArtists(connectivityChecker, searchQuery, startPage, limitPerPage)
+            .searchForArtists(hasInternet,searchQuery, startPage, limitPerPage)
     }
 
     suspend fun lastArtistSearchResult() : DataRepositoryResponse<List<ArtistSearchResult>,Throwable>
@@ -68,23 +68,23 @@ object DataRepository {
     //region functions for runtime access to artists
     /**See Documentation for this function in RuntimeRepository*/
     suspend fun getArtistByName(
-        connectivityChecker: ConnectivityChecker,
+        hasInternet : Boolean,
         mbid: String,
         shouldIgnoreRuntimeCache : Boolean = false
     ) : DataRepositoryResponse<Artist,Throwable> = coroutineScope{
         return@coroutineScope runtimeRepository
-            .getArtistByName(connectivityChecker,mbid,shouldIgnoreRuntimeCache)
+            .getArtistByName(hasInternet,mbid,shouldIgnoreRuntimeCache)
     }
 
     /**See Documentation for this function in RuntimeRepository*/
     suspend fun getTopAlbumsByArtistName(
-        connectivityChecker: ConnectivityChecker,
+        hasInternet : Boolean,
         artistName: String,
         startPage : Int,
         limitPerPage : Int,
     ): DataRepositoryResponse<TopAlbumOfArtistResult,Throwable> = coroutineScope{
         return@coroutineScope runtimeRepository
-            .getTopAlbumsByArtistName(connectivityChecker,artistName, startPage, limitPerPage)
+            .getTopAlbumsByArtistName(hasInternet,artistName, startPage, limitPerPage)
     }
     //endregion
 

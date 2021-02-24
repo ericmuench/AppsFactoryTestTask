@@ -8,9 +8,10 @@ import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
 import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepository
 import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepositoryResponse
-import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
+import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.notNullSuspending
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
+import de.ericmuench.appsfactorytesttask.viewmodel.abstract_viewmodels.DetailViewModel
 import kotlinx.coroutines.*
 
 class ArtistDetailViewModel : DetailViewModel<Artist>() {
@@ -37,38 +38,33 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
         ?.flatten() ?: emptyList()
     //endregion
 
-    //region Implemented Abstract Functions From Upper Classes and Interfaces
-    override fun loadData(onError: (Throwable) -> Unit) {
+    //region Functions
+    fun loadDataInitially(hasInternet: Boolean,onError: (Throwable) -> Unit) {
         viewModelScope.launch {
             detailData.value.notNullSuspending {artist ->
-                val conCheck = ConnectivityChecker()
-
                 val artistLoadingState = detailLoadingState.value ?: LoadingState.IDLE
                 if(!artistLoadingState.isLoading){
                     launch {
-                        loadDetails(conCheck,artist,onError)
+                        loadDetails(hasInternet, artist,onError)
                     }
                 }
 
                 launch {
-
                     _topAlbumResults.value = emptyList()
                     loadAlbumData(
-                        connectivityChecker = conCheck,
+                        hasInternet = hasInternet,
                         onError = onError,
                         artistName = artist.artistName
                     )
-
                 }
             }
 
         }
     }
-    //endregion
 
-    //region Functions
+
     fun loadMoreAlbumData(
-        conCheck :ConnectivityChecker,
+        hasInternet: Boolean,
         onError: (Throwable) -> Unit = {}
     ) = viewModelScope.launch{
         detailData.value.notNullSuspending {artist ->
@@ -79,7 +75,7 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
                 if(lastPage <= existingResults.last().totalPages){
                     println("Loading page ${lastPage + 1}")
                     loadAlbumData(
-                        connectivityChecker = conCheck,
+                        hasInternet = hasInternet,
                         onError = onError,
                         artistName = artist.artistName,
                         startPage = lastPage + 1,
@@ -93,7 +89,7 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
 
     //region Data Loading Functions
     private suspend fun loadAlbumData(
-        connectivityChecker: ConnectivityChecker,
+        hasInternet: Boolean,
         artistName: String,
         startPage: Int = 1,
         limitPerPage: Int = 10,
@@ -107,13 +103,9 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
 
         _albumsLoadingState.value = loadMode
 
-        val topAlbumsResponseDef = async(Dispatchers.IO){
-            DataRepository.getTopAlbumsByArtistName(
-                connectivityChecker, artistName, startPage, limitPerPage
-            )
-        }
-
-        val topAlbumsResponse = topAlbumsResponseDef.await()
+        val topAlbumsResponse = DataRepository.getTopAlbumsByArtistName(
+             hasInternet,artistName, startPage, limitPerPage
+        )
         when(topAlbumsResponse){
             is DataRepositoryResponse.Data -> {
                 val newDataDef =async(Dispatchers.IO){
@@ -132,12 +124,12 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
     }
 
     private suspend fun loadDetails(
-        connectivityChecker: ConnectivityChecker,
+        hasInternet: Boolean,
         artist : Artist,
         onError: (Throwable) -> Unit = {}
     ){
         _detailLoadingState.value = LoadingState.LOADING
-        val artistRepoResponse = DataRepository.getArtistByName(connectivityChecker,artist.artistName)
+        val artistRepoResponse = DataRepository.getArtistByName(hasInternet,artist.artistName)
         when(artistRepoResponse){
             is DataRepositoryResponse.Data -> {
                 setDetailDataValue(artistRepoResponse.value)

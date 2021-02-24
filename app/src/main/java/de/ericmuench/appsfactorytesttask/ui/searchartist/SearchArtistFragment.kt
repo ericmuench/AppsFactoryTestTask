@@ -14,14 +14,16 @@ import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_SEARCH_ARTIST_
 import de.ericmuench.appsfactorytesttask.databinding.FragmentSearchArtistBinding
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.ui.detail.ArtistDetailActivity
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseActivity
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseFragment
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.RecyclerViewScrollPositionDetector
-import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
+import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.*
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.SearchArtistViewModel
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 /**
  * A simple [Fragment] subclass, which is responsible for the search of an artist.
@@ -35,7 +37,14 @@ class SearchArtistFragment : BaseFragment() {
     private var recyclerViewAdapter : GenericSimpleItemAdapter<Artist>? = null
     private val recyclerViewPositionDetector = RecyclerViewScrollPositionDetector().apply {
         onEndReached = {
-            viewModel.loadMoreSearchData(ConnectivityChecker()){ handleError(it)}
+            activity?.castedAs<BaseActivity> {
+                val hasInternet = it
+                    .internetConnectivityChecker
+                    .internetConnectivityState
+                    .hasInternetConnection
+
+                viewModel.loadMoreSearchData(hasInternet)
+            }
         }
     }
 
@@ -104,7 +113,6 @@ class SearchArtistFragment : BaseFragment() {
                     holder.txtText.text = artist.artistName
                     holder.imageButton.visibility = View.INVISIBLE
                     holder.cardView.setOnClickListener {
-                        //TODO: Open detail page for artist (top album overview)
                         switchToActivity<ArtistDetailActivity>(){
                             putExtra(
                                 INTENT_KEY_SEARCH_ARTIST_TO_ARTIST_DETAIL_TRANSFERRED_ARTIST,
@@ -136,9 +144,17 @@ class SearchArtistFragment : BaseFragment() {
                         lifecycleScope.launch {
                             hideKeyboard()
                             viewModel.artistSearchQuery = queryNN
-                            viewModel.submitArtistSearchQuery(ConnectivityChecker()) {
-                                handleError(it)
+
+                            activity?.castedAs<BaseActivity> { baseActivity ->
+
+                                val hasInternet = baseActivity.internetConnectivityChecker
+                                    .internetConnectivityState
+                                    .hasInternetConnection
+                                viewModel.submitArtistSearchQuery(hasInternet){
+                                    handleError(it)
+                                }
                             }
+
                         }
                     }
                     return true
@@ -205,6 +221,10 @@ class SearchArtistFragment : BaseFragment() {
                        viewBinding.progressBottomSearchArtist.root.hide()
                    }
                    LoadingState.LOADING -> {
+                       viewBinding.progressTopSearchArtist.root.show()
+                       viewBinding.progressBottomSearchArtist.root.hide()
+                   }
+                   LoadingState.RELOADING -> {
                        viewBinding.progressTopSearchArtist.root.show()
                        viewBinding.progressBottomSearchArtist.root.hide()
                    }

@@ -4,7 +4,7 @@ import com.github.kittinunf.result.Result
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchCache
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
-import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
+import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -41,7 +41,7 @@ class ArtistSearchRepository(private val apiClient : LastFmApiClient) {
 
     //region functions for artist search
     suspend fun searchForArtists(
-        connectivityChecker: ConnectivityChecker,
+        hasInternet : Boolean,
         searchQuery : String,
         startPage : Int,
         limitPerPage : Int
@@ -55,9 +55,8 @@ class ArtistSearchRepository(private val apiClient : LastFmApiClient) {
         }
 
         //There is no cached data available -> load data from network
-        val hasInternetConnectionDef = async { connectivityChecker.isConnectedToInternet() }
-        if(!hasInternetConnectionDef.await()){
-            return@coroutineScope DataRepositoryResponse.Error(IOException("No Internet-Connection available"))
+        if(!hasInternet){
+            return@coroutineScope DataRepositoryResponse.Error(IOException("No Internet Connection"))
         }
 
         val resultDeferred = async(Dispatchers.IO) {

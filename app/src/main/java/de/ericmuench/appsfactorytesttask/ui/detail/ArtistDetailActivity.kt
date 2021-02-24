@@ -9,10 +9,11 @@ import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.scrolling.NestedScrollViewPositionDetector
-import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
+import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.ArtistDetailViewModel
+import java.io.IOException
 
 
 class ArtistDetailActivity : DetailActivity() {
@@ -22,7 +23,10 @@ class ArtistDetailActivity : DetailActivity() {
     private var recyclerViewAdapter : GenericSimpleItemAdapter<Album>? = null
     private val scrollViewPositionDetector = NestedScrollViewPositionDetector().apply {
         onEndReached = {
-            viewModel.loadMoreAlbumData(ConnectivityChecker()){ handleError(it)}
+            val hasInternet = internetConnectivityChecker
+                .internetConnectivityState
+                .hasInternetConnection
+            viewModel.loadMoreAlbumData(hasInternet)
         }
     }
     //endregion
@@ -35,6 +39,10 @@ class ArtistDetailActivity : DetailActivity() {
 
         //vm setup
         setupViewModel()
+    }
+
+    override fun onStart() {
+        super.onStart()
 
         //getting data from intent
         handleIntentData()
@@ -156,7 +164,11 @@ class ArtistDetailActivity : DetailActivity() {
         if(intentData != null){
             if(viewModel.detailData.value == null){
                 viewModel.initializeWithTransferredData(intentData)
-                viewModel.loadData{ handleError(it) }
+                val hasInternet = internetConnectivityChecker
+                    .internetConnectivityState
+                    .hasInternetConnection
+
+                viewModel.loadDataInitially(hasInternet){ handleError(it) }
             }
         }
         else{

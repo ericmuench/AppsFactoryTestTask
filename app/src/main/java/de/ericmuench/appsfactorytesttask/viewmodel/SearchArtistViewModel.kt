@@ -8,7 +8,7 @@ import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepository
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepositoryResponse
-import de.ericmuench.appsfactorytesttask.util.connectivity.ConnectivityChecker
+import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.notNullSuspending
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import kotlinx.coroutines.coroutineScope
@@ -57,25 +57,25 @@ class SearchArtistViewModel : ViewModel() {
 
     //functions
     fun submitArtistSearchQuery(
-        connectivityChecker: ConnectivityChecker,
+        hasInternet : Boolean,
         onError : (Throwable) -> Unit = {}
     ) = viewModelScope.launch{
         _loadingState.value = LoadingState.LOADING
         clearArtistSearchData()
-        val job = launch { loadData(connectivityChecker,onError,1) }
+        val job = launch { loadData(hasInternet,onError,1) }
         job.join()
         _loadingState.value = LoadingState.IDLE
     }
 
     fun loadMoreSearchData(
-            connectivityChecker: ConnectivityChecker,
-            onError : (Throwable) -> Unit = {}
+        hasInternet : Boolean,
+        onError : (Throwable) -> Unit = {}
     ) = viewModelScope.launch{
         _searchedArtistsResultChunks.value.notNullSuspending { currentResults ->
             if(currentResults.isNotEmpty()){
                 _loadingState.value = LoadingState.LOADING_MORE
                 val page = currentResults.last().startPage + 1
-                val job = launch { loadData(connectivityChecker,onError,page) }
+                val job = launch { loadData(hasInternet,onError,page) }
                 job.join()
                 _loadingState.value = LoadingState.IDLE
             }
@@ -106,11 +106,11 @@ class SearchArtistViewModel : ViewModel() {
      *
      */
     private suspend fun loadData(
-            connectivityChecker: ConnectivityChecker,
-            onError : (Throwable) -> Unit = {},
-            startPage : Int
+        hasInternet : Boolean,
+        onError : (Throwable) -> Unit = {},
+        startPage : Int
     ) = coroutineScope{
-        val repoResponse = DataRepository.searchForArtists(connectivityChecker,artistSearchQuery,startPage)
+        val repoResponse = DataRepository.searchForArtists(hasInternet,artistSearchQuery,startPage)
         when(repoResponse){
             is DataRepositoryResponse.Data<ArtistSearchResult> ->{
                 if(repoResponse.value.items.isNotEmpty()){
