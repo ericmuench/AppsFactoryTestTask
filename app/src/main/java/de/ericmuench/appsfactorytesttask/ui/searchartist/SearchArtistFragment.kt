@@ -201,16 +201,16 @@ class SearchArtistFragment : BaseFragment() {
             vmLoadState.notNull { loading ->
                 when(loading){
                    LoadingState.IDLE -> {
-                       viewBinding.progressTopSearchArtist.hide()
-                       viewBinding.progressBottomSearchArtist.hide()
+                       viewBinding.progressTopSearchArtist.root.hide()
+                       viewBinding.progressBottomSearchArtist.root.hide()
                    }
                    LoadingState.LOADING -> {
-                       viewBinding.progressTopSearchArtist.show()
-                       viewBinding.progressBottomSearchArtist.hide()
+                       viewBinding.progressTopSearchArtist.root.show()
+                       viewBinding.progressBottomSearchArtist.root.hide()
                    }
                    LoadingState.LOADING_MORE -> {
-                       viewBinding.progressTopSearchArtist.hide()
-                       viewBinding.progressBottomSearchArtist.show()
+                       viewBinding.progressTopSearchArtist.root.hide()
+                       viewBinding.progressBottomSearchArtist.root.show()
                    }
                 }
             }

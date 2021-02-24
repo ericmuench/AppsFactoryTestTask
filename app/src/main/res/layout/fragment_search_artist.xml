@@ -23,11 +23,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.core.widget.ContentLoadingProgressBar
+    <include
+        layout="@layout/layout_contentloadingprogressbar"
         android:id="@+id/progress_top_search_artist"
-        style="?android:attr/progressBarStyle"
-        android:indeterminateTint="?attr/colorPrimary"
-        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -48,11 +46,9 @@
         app:layout_constraintTop_toBottomOf="@+id/progress_top_search_artist"
         app:layout_constraintVertical_chainStyle="packed" />
 
-    <androidx.core.widget.ContentLoadingProgressBar
+    <include
+        layout="@layout/layout_contentloadingprogressbar"
         android:id="@+id/progress_bottom_search_artist"
-        android:indeterminateTint="?attr/colorPrimary"
-        style="?android:attr/progressBarStyle"
-        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

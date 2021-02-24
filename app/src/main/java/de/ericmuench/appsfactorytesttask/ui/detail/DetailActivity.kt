@@ -148,12 +148,12 @@ abstract class DetailActivity : BaseActivity() {
             txtDescriptionDetail.visibility = View.VISIBLE
         }
     }
-    protected fun hideDescriptionProgressBar() = viewBinding.progressDescriptionDetail.hide()
-    protected fun showDescriptionProgressBar() = viewBinding.progressDescriptionDetail.show()
-    protected fun hideDataProgressBar() = viewBinding.progressDataDetail.hide()
-    protected fun hideDataProgressBarBottom() = viewBinding.progressDataBottomDetail.hide()
-    protected fun showDataProgressBarBottom() = viewBinding.progressDataBottomDetail.show()
-    protected fun showDataProgressBar() = viewBinding.progressDataDetail.show()
+    protected fun hideDescriptionProgressBar() = viewBinding.progressDescriptionDetail.root.hide()
+    protected fun showDescriptionProgressBar() = viewBinding.progressDescriptionDetail.root.show()
+    protected fun hideDataProgressBar() = viewBinding.progressDataDetail.root.hide()
+    protected fun hideDataProgressBarBottom() = viewBinding.progressDataBottomDetail.root.hide()
+    protected fun showDataProgressBarBottom() = viewBinding.progressDataBottomDetail.root.show()
+    protected fun showDataProgressBar() = viewBinding.progressDataDetail.root.show()
     protected fun hideAllProgressbars() {
         hideAllDataProgressBars()
         hideDescriptionProgressBar()

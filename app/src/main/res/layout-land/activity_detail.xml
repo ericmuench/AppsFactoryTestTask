@@ -116,15 +116,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.core.widget.ContentLoadingProgressBar
+            <include
+                layout="@layout/layout_contentloadingprogressbar"
                 android:id="@+id/progress_description_detail"
-                style="?android:attr/progressBarStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:indeterminateTint="?attr/colorPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/txt_headline_description_detail" />
@@ -172,15 +171,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/btn_more_detail" />
 
-            <androidx.core.widget.ContentLoadingProgressBar
+            <include
+                layout="@layout/layout_contentloadingprogressbar"
                 android:id="@+id/progress_data_detail"
-                style="?android:attr/progressBarStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:indeterminateTint="?attr/colorPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/txt_headline_data_detail" />
@@ -196,16 +194,15 @@
                 app:layout_constraintTop_toBottomOf="@+id/progress_data_detail"
                 tools:listitem="@layout/generic_simple_item" />
 
-            <androidx.core.widget.ContentLoadingProgressBar
+            <include
+                layout="@layout/layout_contentloadingprogressbar"
                 android:id="@+id/progress_data_bottom_detail"
-                style="?android:attr/progressBarStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="8dp"
-                android:indeterminateTint="?attr/colorPrimary"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
