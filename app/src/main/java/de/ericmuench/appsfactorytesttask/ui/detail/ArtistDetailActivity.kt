@@ -1,16 +1,17 @@
 package de.ericmuench.appsfactorytesttask.ui.detail
 
 import android.os.Bundle
-import android.view.Menu
 import androidx.activity.viewModels
 import androidx.core.content.res.ResourcesCompat
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_SEARCH_ARTIST_TO_ARTIST_DETAIL_TRANSFERRED_ARTIST
+import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_TRANSFER_ALBUM
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.scrolling.NestedScrollViewPositionDetector
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
+import de.ericmuench.appsfactorytesttask.util.extensions.switchToActivity
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.ArtistDetailViewModel
 
@@ -88,7 +89,15 @@ class ArtistDetailActivity : DetailActivity() {
 
                     holder.imageButton.setImageDrawable(drawableStore)
                 }
+
+
+
                 holder.txtText.text = album.title
+                holder.cardView.setOnClickListener {
+                    switchToActivity<AlbumDetailActivity>(){
+                        putExtra(INTENT_KEY_TRANSFER_ALBUM,album)
+                    }
+                }
             }
         recyclerView.adapter = recyclerViewAdapter
     }
@@ -108,7 +117,7 @@ class ArtistDetailActivity : DetailActivity() {
                 title = artist.artistName
                 val description = artist
                     .description
-                    .takeIf { it.isNotBlank() } ?: resources.getString(R.string.no_album_description)
+                    .takeIf { it.isNotBlank() } ?: resources.getString(R.string.no_description_available)
                 setDescription(description)
                 //TODO: Handle Image with glide
             }

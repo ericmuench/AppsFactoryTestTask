@@ -14,7 +14,7 @@
     <string name="navigate_back">Navigate Back</string>
     <string name="about_artist">About the Artist</string>
     <string name="about_album">About the Album</string>
-    <string name="no_album_description">No Album Description available.</string>
+    <string name="no_description_available">No Description available.</string>
     <string name="no_internet_connection">No internet Connection.</string>
     <string name="reload">Reload</string>
 </resources>

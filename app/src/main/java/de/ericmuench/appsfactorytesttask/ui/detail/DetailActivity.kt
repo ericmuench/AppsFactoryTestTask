@@ -26,7 +26,8 @@ abstract class DetailActivity : BaseActivity() {
     //region fields
     private lateinit var viewBinding : ActivityDetailBinding
 
-    private val menuItems = mutableListOf<MenuItem>()
+
+    protected var shouldDisplayOptionsMenu : Boolean = true
     private var onReloadButtonClicked : () -> Unit = {}
     //endregion
 
@@ -44,11 +45,21 @@ abstract class DetailActivity : BaseActivity() {
         setupRecyclerView()
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewBinding.imgBtnMenuReloadSubstituteLand?.visibility = if (shouldDisplayOptionsMenu){
+            View.VISIBLE
+        }
+        else{
+            View.GONE
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.detail_actionbar_menu,menu)
         //assign menu items
-        menu?.findItem(R.id.acbar_item_reload_detail)?.notNull {
-            menuItems.add(it)
+        if(!shouldDisplayOptionsMenu){
+            menu?.findItem(R.id.acbar_item_reload_detail)?.isVisible = false
         }
         return true
     }
@@ -76,29 +87,6 @@ abstract class DetailActivity : BaseActivity() {
         //landscape
         imgBtnBackDetailLand?.setOnClickListener{
             onActionbarBackButtonPressed()
-        }
-    }
-
-    protected fun setOptionMenuVisibility(shouldBeVisible : Boolean) = with(viewBinding){
-        if(shouldBeVisible){
-            if(runsInLandscape()){
-                imgBtnMenuReloadSubstituteLand?.visibility = View.VISIBLE
-            }
-            else{
-                menuItems.forEach {
-                    it.isVisible = true
-                }
-            }
-        }
-        else{
-            if(runsInLandscape()){
-                imgBtnMenuReloadSubstituteLand?.visibility = View.INVISIBLE
-            }
-            else{
-                menuItems.forEach {
-                    it.isVisible = false
-                }
-            }
         }
     }
 
@@ -153,6 +141,15 @@ abstract class DetailActivity : BaseActivity() {
         }
 
         fabDetail?.setImageDrawable(drawable)
+    }
+
+    protected fun getFabActionDrawable() : Drawable? = with(viewBinding){
+        return@with if(runsInLandscape()){
+            imgBtnFabSubstituteLand?.drawable
+        }
+        else{
+            fabDetail?.drawable
+        }
     }
 
     protected fun hideFabAction()= with(viewBinding){
