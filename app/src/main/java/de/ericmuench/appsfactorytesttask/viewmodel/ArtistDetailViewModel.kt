@@ -9,6 +9,7 @@ import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
 import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepository
 import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepositoryResponse
 import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
+import de.ericmuench.appsfactorytesttask.util.errorhandling.OnErrorHandler
 import de.ericmuench.appsfactorytesttask.util.extensions.notNullSuspending
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.abstract_viewmodels.DetailViewModel
@@ -42,10 +43,13 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
     fun loadDataInitially(hasInternet: Boolean,onError: (Throwable) -> Unit) {
         viewModelScope.launch {
             detailData.value.notNullSuspending {artist ->
+
+                val onErrorHandler = OnErrorHandler(onError)
+
                 val artistLoadingState = detailLoadingState.value ?: LoadingState.IDLE
                 if(!artistLoadingState.isLoading){
                     launch {
-                        loadDetails(hasInternet, artist,LoadingState.LOADING,false,onError)
+                        loadDetails(hasInternet, artist,LoadingState.LOADING,false,onErrorHandler)
                     }
                 }
 
@@ -53,7 +57,7 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
                     _topAlbumResults.value = emptyList()
                     loadAlbumData(
                         hasInternet = hasInternet,
-                        onError = onError,
+                        onError = onErrorHandler,
                         artistName = artist.artistName
                     )
                 }
@@ -65,10 +69,13 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
     fun reloadData(hasInternet: Boolean,onError: (Throwable) -> Unit = {}) {
         viewModelScope.launch {
             detailData.value.notNullSuspending {artist ->
+
+                val onErrorHandler = OnErrorHandler(onError)
+
                 val artistLoadingState = detailLoadingState.value ?: LoadingState.IDLE
                 if(!artistLoadingState.isLoading){
                     launch {
-                        loadDetails(hasInternet, artist,LoadingState.RELOADING,true,onError)
+                        loadDetails(hasInternet, artist,LoadingState.RELOADING,true,onErrorHandler)
                     }
                 }
 
@@ -76,7 +83,7 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
                     _topAlbumResults.value = emptyList()
                     loadAlbumData(
                         hasInternet = hasInternet,
-                        onError = onError,
+                        onError = onErrorHandler,
                         artistName = artist.artistName,
                         loadMode = LoadingState.RELOADING,
                         shouldRefreshRuntimeCache = true
@@ -99,7 +106,7 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
                 if(lastPage <= existingResults.last().totalPages){
                     loadAlbumData(
                         hasInternet = hasInternet,
-                        onError = onError,
+                        onError = OnErrorHandler(onError),
                         artistName = artist.artistName,
                         startPage = lastPage + 1,
                         loadMode = LoadingState.LOADING_MORE
@@ -118,7 +125,7 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
         limitPerPage: Int = 10,
         loadMode : LoadingState = LoadingState.LOADING,
         shouldRefreshRuntimeCache : Boolean = false,
-        onError: (Throwable) -> Unit = {}
+        onError: OnErrorHandler = OnErrorHandler {  }
     ) = coroutineScope{
         val albumsLoading = albumsLoadingState.value ?: LoadingState.IDLE
         if(albumsLoading.isLoading){
@@ -142,7 +149,11 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
 
                 _topAlbumResults.value = newDataDef.await()
             }
-            is DataRepositoryResponse.Error -> onError(topAlbumsResponse.error)
+            is DataRepositoryResponse.Error -> {
+                if(!onError.wasAlreadyExecuted){
+                    onError(topAlbumsResponse.error)
+                }
+            }
         }
         _albumsLoadingState.value = LoadingState.IDLE
     }
@@ -152,7 +163,7 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
         artist : Artist,
         loadMode : LoadingState = LoadingState.LOADING,
         shouldIgnoreRuntimeCache : Boolean = false,
-        onError: (Throwable) -> Unit = {}
+        onError: OnErrorHandler = OnErrorHandler {  }
     ){
         _detailLoadingState.value = loadMode
         val artistRepoResponse = DataRepository.getArtistByName(
@@ -165,7 +176,11 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
             is DataRepositoryResponse.Data -> {
                 setDetailDataValue(artistRepoResponse.value)
             }
-            is DataRepositoryResponse.Error -> onError(artistRepoResponse.error)
+            is DataRepositoryResponse.Error -> {
+                if(!onError.wasAlreadyExecuted){
+                    onError(artistRepoResponse.error)
+                }
+            }
         }
         _detailLoadingState.value = LoadingState.IDLE
     }
