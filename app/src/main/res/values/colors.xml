@@ -12,9 +12,12 @@
     <color name="gray_800">#252525</color>
     <color name="gray_700">#333333</color>
     <color name="gray_600">#414141</color>
+    <color name="gray_600_transparency">#90414141</color>
     <color name="gray_500">#5F5F5F</color>
     <color name="gray_300">#898989</color>
     <color name="gray_200">#A8A8A8</color>
     <color name="gray_100">#D6D6D6</color>
+    <color name="gray_100_transparency">#8DD6D6D6</color>
     <color name="gray_50">#F5F5F5</color>
+
 </resources>

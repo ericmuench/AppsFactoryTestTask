@@ -54,6 +54,7 @@ class ArtistDetailActivity : DetailActivity() {
         setupHeadlines()
         hideFabAction()
         hideAllProgressbars()
+        hideLayerImage()
 
         //more btn
         setMoreButtonOnClickListener {

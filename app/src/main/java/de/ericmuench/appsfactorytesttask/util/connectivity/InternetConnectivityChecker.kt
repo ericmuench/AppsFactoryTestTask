@@ -8,6 +8,7 @@ import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 import java.lang.ref.WeakReference
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -24,30 +25,40 @@ class InternetConnectivityChecker(
 ) : ConnectivityManager.NetworkCallback(), DefaultLifecycleObserver {
 
     //region Fields
-    private val contextRef = WeakReference(context)
+    private val contextRef = WeakReference(context.applicationContext)
     var internetConnectivityState : InternetConnectivityState = InternetConnectivityState.UNDETERMINED
         private set
 
     //endregion
 
     //region Lifecycle-Observer Functions
-    override fun onCreate(owner: LifecycleOwner) {
-        super.onCreate(owner)
-        val context = contextRef.get()
-        context?.connectivityManager.notNull {
-            val request = NetworkRequest
-                .Builder()
-                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                .build()
-            it.registerNetworkCallback(request,this)
+    override fun onResume(owner: LifecycleOwner) {
+        super.onResume(owner)
+        try {
+            val context = contextRef.get()
+            context?.connectivityManager.notNull {
+                val request = NetworkRequest
+                    .Builder()
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    .build()
+                it.registerNetworkCallback(request,this)
+            }
+        }
+        catch(ex : Exception){
+            ex.printStackTrace()
         }
     }
 
-    override fun onDestroy(owner: LifecycleOwner) {
-        super.onDestroy(owner)
-        val context = contextRef.get()
-        context?.connectivityManager.notNull {
-            it.unregisterNetworkCallback(this)
+    override fun onPause(owner: LifecycleOwner) {
+        super.onPause(owner)
+        try {
+            val context = contextRef.get()
+            context?.connectivityManager.notNull {
+                it.unregisterNetworkCallback(this)
+            }
+        }
+        catch (ex: Exception){
+            ex.printStackTrace()
         }
     }
     //endregion

@@ -119,7 +119,11 @@ abstract class DetailActivity : BaseActivity() {
     }
 
     protected val imgViewDetail : ImageView
-    get() = viewBinding.imgDetail
+        get() = viewBinding.imgDetail
+
+    protected fun hideLayerImage() = with(viewBinding){
+        imgLayerDetail.visibility = View.INVISIBLE
+    }
 
     protected fun setNestedScrollViewOnScrollStateChangeListener(
         listener : NestedScrollView.OnScrollChangeListener

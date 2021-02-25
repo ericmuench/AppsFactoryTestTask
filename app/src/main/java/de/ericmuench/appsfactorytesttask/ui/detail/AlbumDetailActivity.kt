@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
+import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_TRANSFER_ALBUM
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
@@ -14,6 +17,8 @@ import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSim
 import de.ericmuench.appsfactorytesttask.util.extensions.finishWithResultData
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.viewmodel.AlbumDetailViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class AlbumDetailActivity : DetailActivity() {
 
@@ -39,22 +44,17 @@ class AlbumDetailActivity : DetailActivity() {
         applyIntentDataOrFinish()
 
     }
-    /*override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
-            android.R.id.home -> {
-                finishWithResultData(Activity.RESULT_CANCELED){
-
-                    //putExtra(INTENT_KEY_HAS_DATA_CHANGED,indicator if)
-                }
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }*/
     //endregion
 
     //region Layout Setup Functions
     private fun setupLayout(){
+        //img
+        lifecycleScope.launch {
+            val defaultAlbumDrawable = ResourcesCompat
+                .getDrawable(resources,R.drawable.ic_album_default_image,null)
+            imgViewDetail.setImageDrawable(defaultAlbumDrawable)
+        }
+
         setupHeadlines()
         shouldDisplayOptionsMenu = false
         hideAllProgressbars()
@@ -77,7 +77,7 @@ class AlbumDetailActivity : DetailActivity() {
                         openWebUrl(songUrl)
                     }
                 }
-                holder.imageButton.visibility = View.INVISIBLE
+                holder.imageButton.visibility = View.GONE
                 holder.txtText.text = song.title
             }
         recyclerView.adapter = recyclerViewAdapter
@@ -101,6 +101,17 @@ class AlbumDetailActivity : DetailActivity() {
             albumData.notNull { album ->
                 //Apply Album Details to UI
                 title = album.title
+
+                album.imgUrl.notNull {
+                    lifecycleScope.launch{
+                        Glide.with(this@AlbumDetailActivity)
+                            .load(album.imgUrl)
+                            .centerCrop()
+                            .placeholder(R.drawable.ic_album_default_image)
+                            .into(imgViewDetail)
+                    }
+                }
+
 
                 val description = album
                     .description
