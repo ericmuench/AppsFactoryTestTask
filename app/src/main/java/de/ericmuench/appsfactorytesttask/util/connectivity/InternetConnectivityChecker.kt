@@ -1,13 +1,8 @@
 package de.ericmuench.appsfactorytesttask.util.connectivity
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import android.net.*
+import androidx.lifecycle.*
 import de.ericmuench.appsfactorytesttask.util.extensions.connectivityManager
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +21,7 @@ import java.net.Socket
  * */
 class InternetConnectivityChecker(
     context: Context
-) : ConnectivityManager.NetworkCallback(), LifecycleObserver{
+) : ConnectivityManager.NetworkCallback(), DefaultLifecycleObserver {
 
     //region Fields
     private val contextRef = WeakReference(context)
@@ -36,9 +31,10 @@ class InternetConnectivityChecker(
     //endregion
 
     //region Lifecycle-Observer Functions
-    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    private fun registerNetworkListener(){
-        contextRef.get()?.connectivityManager.notNull {
+    override fun onCreate(owner: LifecycleOwner) {
+        super.onCreate(owner)
+        val context = contextRef.get()
+        context?.connectivityManager.notNull {
             val request = NetworkRequest
                 .Builder()
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
@@ -47,9 +43,10 @@ class InternetConnectivityChecker(
         }
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    private fun unregisterNetworkListener(){
-        contextRef.get()?.connectivityManager.notNull {
+    override fun onDestroy(owner: LifecycleOwner) {
+        super.onDestroy(owner)
+        val context = contextRef.get()
+        context?.connectivityManager.notNull {
             it.unregisterNetworkCallback(this)
         }
     }
@@ -83,7 +80,9 @@ class InternetConnectivityChecker(
         LOSING(true),
         LOST(false),
         DISCONNECTED(false),
-        UNDETERMINED(false)
+        UNDETERMINED(true) //If Connectivity-State is
+                                           // indetermite, lets give it a try and see if there is
+                                           // internet
     }
     //endregion
 }

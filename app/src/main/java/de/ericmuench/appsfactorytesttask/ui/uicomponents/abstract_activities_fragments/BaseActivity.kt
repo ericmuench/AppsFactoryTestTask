@@ -7,6 +7,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import de.ericmuench.appsfactorytesttask.R
+import de.ericmuench.appsfactorytesttask.app.AppsFactoryTestTaskApplication
 import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 
@@ -17,12 +18,12 @@ import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 abstract class BaseActivity : AppCompatActivity() {
 
     //region Fields
-    lateinit var internetConnectivityChecker : InternetConnectivityChecker
+    val internetConnectivityChecker : InternetConnectivityChecker
+        = AppsFactoryTestTaskApplication.internetConnectivityChecker
     //endregion
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        internetConnectivityChecker = InternetConnectivityChecker(this)
         lifecycle.addObserver(internetConnectivityChecker)
     }
 
