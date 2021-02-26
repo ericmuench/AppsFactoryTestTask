@@ -1,11 +1,11 @@
-package de.ericmuench.appsfactorytesttask.model.runtime.repository
+package de.ericmuench.appsfactorytesttask.model.runtime.repository.network
 
 import com.github.kittinunf.result.Result
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
-import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
+import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepositoryResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -14,10 +14,14 @@ import java.io.IOException
 
 /**
  * This class defines the Repository for managing artists,Albums and Songs. It was
- * implemented to separately manage Artists, Songs and Albums stored at Runtime from those used for
- * the Search as well as for the Database.
+ * implemented to separately manage Artists, Songs and Albums stored/cached at Runtime from those
+ * used for the Search as well as for the Database. The reason for the separation from the Artist-
+ * Search-Repository is, that both data should be managed in different parts of the part due to the
+ * fact that they are used differently. ArtistSearchRepository should just be "a quick storage for
+ * storing searched Artists" only used for the Artist-Search-Screen whereas this class should store
+ * the Artists fetched from Network in Context of the whole App.
  * */
-class RuntimeRepository(private val apiClient: LastFmApiClient){
+class RuntimeNetworkRepository(apiClient: LastFmApiClient) : NetworkRepository(apiClient){
 
     //region fields
     /**
@@ -52,7 +56,7 @@ class RuntimeRepository(private val apiClient: LastFmApiClient){
         hasInternet : Boolean,
         name: String,
         shouldIgnoreRuntimeCache : Boolean = false
-    ) : DataRepositoryResponse<Artist,Throwable> = coroutineScope{
+    ) : DataRepositoryResponse<Artist, Throwable> = coroutineScope{
         if(!shouldIgnoreRuntimeCache){
             //Do not ignore cache and get Data from it
             val dataFromStorage = artistRuntimeStorage[name]
@@ -99,7 +103,7 @@ class RuntimeRepository(private val apiClient: LastFmApiClient){
         startPage : Int,
         limitPerPage : Int,
         shouldRefreshRuntimeCache : Boolean,
-    ): DataRepositoryResponse<TopAlbumOfArtistResult,Throwable> = coroutineScope{
+    ): DataRepositoryResponse<TopAlbumOfArtistResult, Throwable> = coroutineScope{
         //looking for cached result
         if(shouldRefreshRuntimeCache){
             topAlbumResultsRuntimeStorage.remove(artistName)

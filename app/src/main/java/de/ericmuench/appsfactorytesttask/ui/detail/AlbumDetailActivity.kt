@@ -107,7 +107,7 @@ class AlbumDetailActivity : DetailActivity() {
                         Glide.with(this@AlbumDetailActivity)
                             .load(album.imgUrl)
                             .centerCrop()
-                            .placeholder(R.drawable.ic_album_default_image)
+                            .placeholder(R.drawable.ic_album_loading)
                             .into(imgViewDetail)
                     }
                 }

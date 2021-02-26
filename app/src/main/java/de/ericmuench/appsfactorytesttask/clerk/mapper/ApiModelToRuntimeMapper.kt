@@ -6,6 +6,7 @@ import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.ArtistSearchR
 import de.ericmuench.appsfactorytesttask.model.lastfm.image.ImageFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.artistsearch.SearchedArtistFromLastFm
 import de.ericmuench.appsfactorytesttask.model.lastfm.error.ErrorFromLastFm
+import de.ericmuench.appsfactorytesttask.model.lastfm.error.LastFmException
 import de.ericmuench.appsfactorytesttask.model.lastfm.topalbums.TopAlbumsFromLastFm
 import de.ericmuench.appsfactorytesttask.model.runtime.*
 import java.util.*
@@ -79,7 +80,7 @@ class ApiModelToRuntimeMapper {
 
 
     //functions for Errors
-    fun mapError(apiError : ErrorFromLastFm): Exception = Exception(apiError.getLastFmErrorMessage())
+    fun mapError(apiError : ErrorFromLastFm): Exception = apiError.getLastFmException()
 
     //help functions
     /**

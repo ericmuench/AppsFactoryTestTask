@@ -12,4 +12,6 @@ data class ExtendedErrorFromLastFm(
     val message: String
 ): ErrorFromLastFm{
     override fun getLastFmErrorMessage(): String = "$error: $message"
+
+    override fun getLastFmException(): LastFmException = LastFmException(getLastFmErrorMessage())
 }

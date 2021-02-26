@@ -1,10 +1,9 @@
-package de.ericmuench.appsfactorytesttask.model.runtime.repository
+package de.ericmuench.appsfactorytesttask.model.runtime.repository.network
 
 import com.github.kittinunf.result.Result
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
-import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchCache
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
-import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
+import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepositoryResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -15,7 +14,7 @@ import java.io.IOException
  * This class defines a repository for providing all data associated with Searching an Artist
  * */
 
-class ArtistSearchRepository(private val apiClient : LastFmApiClient) {
+class ArtistSearchNetworkRepository(apiClient : LastFmApiClient) : NetworkRepository(apiClient){
     //region fields
     /**This field caches the current Search-Query results and search states*/
     private val artistSearchCache = ArtistSearchCache()
@@ -45,7 +44,7 @@ class ArtistSearchRepository(private val apiClient : LastFmApiClient) {
         searchQuery : String,
         startPage : Int,
         limitPerPage : Int
-    ) : DataRepositoryResponse<ArtistSearchResult,Throwable> = coroutineScope{
+    ) : DataRepositoryResponse<ArtistSearchResult, Throwable> = coroutineScope{
 
         val cachedDataDef = async(Dispatchers.IO){ artistSearchCache.getData(searchQuery, startPage, limitPerPage) }
         val cachedData = cachedDataDef.await()
@@ -78,7 +77,7 @@ class ArtistSearchRepository(private val apiClient : LastFmApiClient) {
         }
     }
 
-    suspend fun lastArtistSearchResult() : DataRepositoryResponse<List<ArtistSearchResult>,Throwable>
+    suspend fun lastArtistSearchResult() : DataRepositoryResponse<List<ArtistSearchResult>, Throwable>
             = coroutineScope{
         val cachedDef = async(Dispatchers.IO){ artistSearchCache.lastSearchResult() }
         return@coroutineScope DataRepositoryResponse.Data(cachedDef.await())

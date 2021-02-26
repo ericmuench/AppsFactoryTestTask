@@ -4,7 +4,8 @@ import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
-import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
+import de.ericmuench.appsfactorytesttask.model.runtime.repository.network.ArtistSearchNetworkRepository
+import de.ericmuench.appsfactorytesttask.model.runtime.repository.network.RuntimeNetworkRepository
 import kotlinx.coroutines.coroutineScope
 
 /**
@@ -19,8 +20,8 @@ object DataRepository {
     //region fields
     /**This field is responsible for all network API-Calls*/
     private val apiClient = LastFmApiClient()
-    private val artistSearchRepository = ArtistSearchRepository(apiClient)
-    private val runtimeRepository = RuntimeRepository(apiClient)
+    private val artistSearchRepository = ArtistSearchNetworkRepository(apiClient)
+    private val runtimeRepository = RuntimeNetworkRepository(apiClient)
 
 
     //TODO: Add further fields for room and runtime cache
