@@ -17,4 +17,6 @@
     <string name="no_description_available">No Description available.</string>
     <string name="no_internet_connection">No internet Connection.</string>
     <string name="reload">Reload</string>
+    <string name="album_cover">Album Cover</string>
+    <string name="background_image">Background Image</string>
 </resources>

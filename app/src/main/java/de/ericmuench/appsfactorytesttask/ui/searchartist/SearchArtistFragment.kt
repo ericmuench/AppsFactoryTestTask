@@ -18,12 +18,10 @@ import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fra
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseFragment
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.RecyclerViewScrollPositionDetector
-import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
 import de.ericmuench.appsfactorytesttask.util.extensions.*
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.SearchArtistViewModel
 import kotlinx.coroutines.launch
-import java.io.IOException
 
 /**
  * A simple [Fragment] subclass, which is responsible for the search of an artist.
@@ -103,9 +101,15 @@ class SearchArtistFragment : BaseFragment() {
      */
     private fun setupRecyclerViewBasics() = with(viewBinding){
         activity.notNull { act ->
-            recyclerviewSearchArtist.layoutManager = if(act.runsInLandscape()) GridLayoutManager(act,2) else LinearLayoutManager(act)
-            recyclerViewAdapter = GenericSimpleItemAdapter(act, emptyList<Artist>())
-                .onApplyDataToViewHolder { holder, artist, _ ->
+            recyclerviewSearchArtist.layoutManager = if(act.runsInLandscape()) {
+                GridLayoutManager(act,2)
+            }
+            else {
+                LinearLayoutManager(act)
+            }
+
+            recyclerViewAdapter = GenericSimpleItemAdapter(act, emptyList<Artist>()).apply {
+                setOnApplyDataToViewHolder { holder, artist, _ ->
                     holder.txtText.text = artist.artistName
                     holder.imageButton.visibility = View.INVISIBLE
                     holder.cardView.setOnClickListener {
@@ -117,6 +121,7 @@ class SearchArtistFragment : BaseFragment() {
                         }
                     }
                 }
+            }
             recyclerviewSearchArtist.adapter = recyclerViewAdapter
         }
     }

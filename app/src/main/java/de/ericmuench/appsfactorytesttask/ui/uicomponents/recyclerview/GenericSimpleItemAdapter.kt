@@ -11,6 +11,54 @@ import androidx.recyclerview.widget.RecyclerView
 import de.ericmuench.appsfactorytesttask.R
 
 /**
+ * This class defines a Recyclerview Adapter for a Simple Item as available in generic_simple_item.xml
+ * */
+class GenericSimpleItemAdapter<T>(
+    context : Context,
+    adapterData : Iterable<T>
+) : GenericRecyclerViewAdapter<T, GenericSimpleItemAdapter.GenericSimpleItemViewHolder>(context,adapterData) {
+
+    //Functions for Adapter
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericSimpleItemViewHolder {
+        val view = LayoutInflater.from(context).inflate(R.layout.generic_simple_item,parent,false)
+        return GenericSimpleItemViewHolder(view)
+    }
+
+
+    //ViewHolder Class
+    class GenericSimpleItemViewHolder(view: View) : RecyclerView.ViewHolder(view){
+        val cardView: CardView = view.findViewById(R.id.card_generic_simple_item)
+        val txtText: TextView = view.findViewById(R.id.txt_text_generic_simple_item)
+        val imageButton: ImageButton = view.findViewById(R.id.img_btn_generic_simple_item)
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*/**
  * This typealias should facilitate the work with the functional type for the apply event.
  * The type of this typealias should allow the access to the Adapter within the closure
  * of onApplyDataToViewHolder of the class. Further to that, you can use the ViewHolder, the current
@@ -116,4 +164,4 @@ class GenericSimpleItemAdapter<T>(
         val txtText: TextView = view.findViewById(R.id.txt_text_generic_simple_item)
         val imageButton: ImageButton = view.findViewById(R.id.img_btn_generic_simple_item)
     }
-}
+}*/

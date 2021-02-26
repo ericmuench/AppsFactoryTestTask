@@ -1,9 +1,6 @@
 package de.ericmuench.appsfactorytesttask.ui.detail
 
-import android.app.Activity
-import android.opengl.Visibility
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
 import androidx.core.content.res.ResourcesCompat
@@ -14,10 +11,8 @@ import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_TRANSFER_ALBUM
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Song
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
-import de.ericmuench.appsfactorytesttask.util.extensions.finishWithResultData
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.viewmodel.AlbumDetailViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class AlbumDetailActivity : DetailActivity() {
@@ -70,8 +65,8 @@ class AlbumDetailActivity : DetailActivity() {
 
     override fun setupRecyclerView() {
         super.setupRecyclerView()
-        recyclerViewAdapter = GenericSimpleItemAdapter<Song>(this, emptyList())
-            .onApplyDataToViewHolder { holder, song, idx ->
+        recyclerViewAdapter = GenericSimpleItemAdapter<Song>(this, emptyList()).apply {
+            setOnApplyDataToViewHolder { holder, song, idx ->
                 holder.cardView.setOnClickListener {
                     song.onlineUrl.notNull {songUrl ->
                         openWebUrl(songUrl)
@@ -80,6 +75,8 @@ class AlbumDetailActivity : DetailActivity() {
                 holder.imageButton.visibility = View.GONE
                 holder.txtText.text = song.title
             }
+        }
+
         recyclerView.adapter = recyclerViewAdapter
     }
 

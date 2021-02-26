@@ -8,14 +8,15 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/img_background_albums_overview"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:alpha="0.01"
+        android:contentDescription="@string/background_image"
         android:background="@android:color/transparent"
         android:src="@drawable/ic_search"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -44,7 +45,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/progress_top_search_artist"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:listitem="@layout/generic_simple_item"/>
 
     <include
         layout="@layout/layout_contentloadingprogressbar"

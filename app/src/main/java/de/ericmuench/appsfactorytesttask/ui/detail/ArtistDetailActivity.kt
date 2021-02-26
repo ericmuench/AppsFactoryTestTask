@@ -76,8 +76,8 @@ class ArtistDetailActivity : DetailActivity() {
     override fun setupRecyclerView() {
         super.setupRecyclerView()
         //recyclerView-Adapter
-        recyclerViewAdapter = GenericSimpleItemAdapter<Album>(this,viewModel.allTopAlbums)
-            .onApplyDataToViewHolder { holder, album, idx ->
+        recyclerViewAdapter = GenericSimpleItemAdapter<Album>(this,viewModel.allTopAlbums).apply {
+            setOnApplyDataToViewHolder { holder, album, idx ->
                 val drawableStore = ResourcesCompat.getDrawable(resources,R.drawable.ic_save,null)
                 val drawableUnStore = ResourcesCompat.getDrawable(resources,R.drawable.ic_remove_circle,null)
                 holder.imageButton.setImageDrawable(drawableStore)
@@ -100,6 +100,7 @@ class ArtistDetailActivity : DetailActivity() {
                     }
                 }
             }
+        }
         recyclerView.adapter = recyclerViewAdapter
     }
 
