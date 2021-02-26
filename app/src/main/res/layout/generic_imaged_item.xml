@@ -24,7 +24,7 @@
         <ImageView
             android:id="@+id/img_generic_imaged_item"
             android:layout_width="match_parent"
-            android:layout_height="240dp"
+            android:layout_height="200dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/album_cover"
             android:scaleType="centerCrop"

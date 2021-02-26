@@ -27,11 +27,10 @@
         android:id="@+id/recyclerview_albums_overview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/generic_imaged_item"/>
+        tools:listitem="@layout/generic_imaged_item" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

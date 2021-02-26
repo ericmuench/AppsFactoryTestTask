@@ -1,9 +1,6 @@
 package de.ericmuench.appsfactorytesttask.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepository
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
@@ -17,7 +14,7 @@ import kotlinx.coroutines.launch
 /**
  * This class defines a ViewModel for the View that is responsible for searching artists
  */
-class SearchArtistViewModel : ViewModel() {
+class SearchArtistViewModel(private val dataRepository: DataRepository) : ViewModel() {
 
     //LiveData
     /**The following fields represent the list of Artists as a Search-Result*/
@@ -32,21 +29,21 @@ class SearchArtistViewModel : ViewModel() {
 
     //fields
     var isSearchingArtist : Boolean
-        get() = DataRepository.isSearchingArtist
+        get() = dataRepository.isSearchingArtist
         set(value) {
-            DataRepository.isSearchingArtist = value
+            dataRepository.isSearchingArtist = value
         }
 
     var artistSearchQuery : String
-        get() = DataRepository.artistSearchQuery
+        get() = dataRepository.artistSearchQuery
         set(value) {
-            DataRepository.artistSearchQuery = value
+            dataRepository.artistSearchQuery = value
         }
 
     var pendingArtistSearchQuery : String
-        get() = DataRepository.pendingArtistSearchQuery
+        get() = dataRepository.pendingArtistSearchQuery
         set(value) {
-            DataRepository.pendingArtistSearchQuery = value
+            dataRepository.pendingArtistSearchQuery = value
         }
 
     val allArtists : List<Artist>
@@ -84,7 +81,7 @@ class SearchArtistViewModel : ViewModel() {
 
     /**This function loads the latest cached data for the Search from the DataRepository*/
     fun loadLastSearchResults() = viewModelScope.launch {
-        val lastSearchRes = DataRepository.lastArtistSearchResult()
+        val lastSearchRes = dataRepository.lastArtistSearchResult()
         if (lastSearchRes is DataRepositoryResponse.Data<List<ArtistSearchResult>>) {
             _searchedArtistsResultChunks.value = lastSearchRes.value
         }
@@ -110,7 +107,7 @@ class SearchArtistViewModel : ViewModel() {
         onError : (Throwable) -> Unit = {},
         startPage : Int
     ) = coroutineScope{
-        val repoResponse = DataRepository.searchForArtists(hasInternet,artistSearchQuery,startPage)
+        val repoResponse = dataRepository.searchForArtists(hasInternet,artistSearchQuery,startPage)
         when(repoResponse){
             is DataRepositoryResponse.Data<ArtistSearchResult> ->{
                 if(repoResponse.value.items.isNotEmpty()){
@@ -123,5 +120,16 @@ class SearchArtistViewModel : ViewModel() {
             }
             is DataRepositoryResponse.Error -> onError(repoResponse.error)
         }
+    }
+}
+
+
+class SearchArtistViewModelFactory(private val repository: DataRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(SearchArtistViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return SearchArtistViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

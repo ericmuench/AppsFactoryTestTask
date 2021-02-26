@@ -1,8 +1,6 @@
 package de.ericmuench.appsfactorytesttask.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
@@ -15,7 +13,7 @@ import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.abstract_viewmodels.DetailViewModel
 import kotlinx.coroutines.*
 
-class ArtistDetailViewModel : DetailViewModel<Artist>() {
+class ArtistDetailViewModel(private val dataRepository : DataRepository) : DetailViewModel<Artist>() {
 
     //region LiveData
     private val _topAlbumResults = MutableLiveData<List<TopAlbumOfArtistResult>>(emptyList())
@@ -134,7 +132,7 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
 
         _albumsLoadingState.value = loadMode
 
-        val topAlbumsResponse = DataRepository.getTopAlbumsByArtistName(
+        val topAlbumsResponse = dataRepository.getTopAlbumsByArtistName(
              hasInternet,artistName, startPage, limitPerPage, shouldRefreshRuntimeCache
         )
         when(topAlbumsResponse){
@@ -166,7 +164,7 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
         onError: OnErrorHandler = OnErrorHandler {  }
     ){
         _detailLoadingState.value = loadMode
-        val artistRepoResponse = DataRepository.getArtistByName(
+        val artistRepoResponse = dataRepository.getArtistByName(
             hasInternet,
             artist.artistName,
             shouldIgnoreRuntimeCache
@@ -185,4 +183,14 @@ class ArtistDetailViewModel : DetailViewModel<Artist>() {
         _detailLoadingState.value = LoadingState.IDLE
     }
     //endregion
+}
+
+class ArtistDetailViewModelFactory(private val repository: DataRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(ArtistDetailViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return ArtistDetailViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }

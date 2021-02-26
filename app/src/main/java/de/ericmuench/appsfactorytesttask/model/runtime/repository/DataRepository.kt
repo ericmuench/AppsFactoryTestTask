@@ -1,6 +1,8 @@
 package de.ericmuench.appsfactorytesttask.model.runtime.repository
 
+import android.content.Context
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
+import de.ericmuench.appsfactorytesttask.model.room.DatabaseRepository
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
@@ -15,13 +17,14 @@ import kotlinx.coroutines.coroutineScope
  * is provided. For all that, the DataRepository uses internal Sub-Repositories and manages
  * their interaction with each other.
  */
-object DataRepository {
+class DataRepository(context : Context){
 
     //region fields
     /**This field is responsible for all network API-Calls*/
     private val apiClient = LastFmApiClient()
     private val artistSearchRepository = ArtistSearchNetworkRepository(apiClient)
     private val runtimeRepository = RuntimeNetworkRepository(apiClient)
+    private val databaseRepository = DatabaseRepository(context)
 
 
     //TODO: Add further fields for room and runtime cache

@@ -1,13 +1,14 @@
 package de.ericmuench.appsfactorytesttask.model.runtime
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
+
 
 @Parcelize
 data class Artist(
     val mbid : String?,
     val artistName : String,
-    var description : String,
+    val description : String,
     val onlineUrl : String?,
     val imageUrl : String?,
 ) : Parcelable{
@@ -38,7 +39,7 @@ data class Artist(
 data class Album(
     val mbid : String?,
     val title : String,
-    var description : String,
+    val description : String,
     val onlineUrl : String?,
     val imgUrl : String?,
     val artistName : String,

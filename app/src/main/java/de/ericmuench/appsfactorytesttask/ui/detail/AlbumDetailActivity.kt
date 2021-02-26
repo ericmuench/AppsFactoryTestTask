@@ -7,18 +7,23 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import de.ericmuench.appsfactorytesttask.R
+import de.ericmuench.appsfactorytesttask.app.AppsFactoryTestTaskApplication
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_TRANSFER_ALBUM
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Song
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.viewmodel.AlbumDetailViewModel
+import de.ericmuench.appsfactorytesttask.viewmodel.AlbumsDetailViewModelFactory
 import kotlinx.coroutines.launch
 
 class AlbumDetailActivity : DetailActivity() {
 
     //region Fields
-    private val viewModel : AlbumDetailViewModel by viewModels()
+    private val viewModel : AlbumDetailViewModel by viewModels{
+        val app = application as AppsFactoryTestTaskApplication
+        AlbumsDetailViewModelFactory(app.dataRepository)
+    }
 
     private var recyclerViewAdapter : GenericSimpleItemAdapter<Song>? = null
     //endregion
@@ -66,7 +71,7 @@ class AlbumDetailActivity : DetailActivity() {
     override fun setupRecyclerView() {
         super.setupRecyclerView()
         recyclerViewAdapter = GenericSimpleItemAdapter<Song>(this, emptyList()).apply {
-            setOnApplyDataToViewHolder { holder, song, idx ->
+            setOnApplyDataToViewHolder { holder, song, _ ->
                 holder.cardView.setOnClickListener {
                     song.onlineUrl.notNull {songUrl ->
                         openWebUrl(songUrl)

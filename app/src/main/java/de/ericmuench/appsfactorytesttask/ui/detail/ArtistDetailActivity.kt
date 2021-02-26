@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.core.content.res.ResourcesCompat
 import de.ericmuench.appsfactorytesttask.R
+import de.ericmuench.appsfactorytesttask.app.AppsFactoryTestTaskApplication
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_SEARCH_ARTIST_TO_ARTIST_DETAIL_TRANSFERRED_ARTIST
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_TRANSFER_ALBUM
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
@@ -14,12 +15,18 @@ import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.util.extensions.switchToActivity
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.ArtistDetailViewModel
+import de.ericmuench.appsfactorytesttask.viewmodel.ArtistDetailViewModelFactory
 
 
 class ArtistDetailActivity : DetailActivity() {
 
     //region fields
-    private val viewModel : ArtistDetailViewModel by viewModels()
+    private val viewModel : ArtistDetailViewModel by viewModels{
+        val app = application as AppsFactoryTestTaskApplication
+        ArtistDetailViewModelFactory(app.dataRepository)
+    }
+
+
     private var recyclerViewAdapter : GenericSimpleItemAdapter<Album>? = null
     private val scrollViewPositionDetector = NestedScrollViewPositionDetector().apply {
         onEndReached = {
@@ -77,7 +84,7 @@ class ArtistDetailActivity : DetailActivity() {
         super.setupRecyclerView()
         //recyclerView-Adapter
         recyclerViewAdapter = GenericSimpleItemAdapter<Album>(this,viewModel.allTopAlbums).apply {
-            setOnApplyDataToViewHolder { holder, album, idx ->
+            setOnApplyDataToViewHolder { holder, album, _ ->
                 val drawableStore = ResourcesCompat.getDrawable(resources,R.drawable.ic_save,null)
                 val drawableUnStore = ResourcesCompat.getDrawable(resources,R.drawable.ic_remove_circle,null)
                 holder.imageButton.setImageDrawable(drawableStore)

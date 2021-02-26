@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.ericmuench.appsfactorytesttask.R
+import de.ericmuench.appsfactorytesttask.app.AppsFactoryTestTaskApplication
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_SEARCH_ARTIST_TO_ARTIST_DETAIL_TRANSFERRED_ARTIST
 import de.ericmuench.appsfactorytesttask.databinding.FragmentSearchArtistBinding
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
@@ -21,6 +22,7 @@ import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.RecyclerVi
 import de.ericmuench.appsfactorytesttask.util.extensions.*
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.SearchArtistViewModel
+import de.ericmuench.appsfactorytesttask.viewmodel.SearchArtistViewModelFactory
 import kotlinx.coroutines.launch
 
 /**
@@ -30,7 +32,10 @@ class SearchArtistFragment : BaseFragment() {
 
     //region fields
     private lateinit var viewBinding : FragmentSearchArtistBinding
-    private val viewModel : SearchArtistViewModel by viewModels()
+    private val viewModel : SearchArtistViewModel by viewModels{
+        val application = requireActivity().application as AppsFactoryTestTaskApplication
+        SearchArtistViewModelFactory(application.dataRepository)
+    }
 
     private var recyclerViewAdapter : GenericSimpleItemAdapter<Artist>? = null
     private val recyclerViewPositionDetector = RecyclerViewScrollPositionDetector().apply {
