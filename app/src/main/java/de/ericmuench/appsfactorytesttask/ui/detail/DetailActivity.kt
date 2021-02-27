@@ -172,6 +172,15 @@ abstract class DetailActivity : BaseActivity() {
         fabDetail?.visibility = View.VISIBLE
     }
 
+    protected fun setFabActionEnabled(enabled : Boolean) = with(viewBinding){
+        if(runsInLandscape()){
+            imgBtnFabSubstituteLand?.isEnabled = enabled
+            return@with
+        }
+
+        fabDetail?.isEnabled = enabled
+    }
+
     protected fun setDescriptionHeadline(headline : CharSequence)= with(viewBinding){
         txtHeadlineDescriptionDetail.text = headline
     }

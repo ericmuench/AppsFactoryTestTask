@@ -3,12 +3,16 @@ package de.ericmuench.appsfactorytesttask.model.runtime.repository
 import android.content.Context
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
 import de.ericmuench.appsfactorytesttask.model.room.DatabaseRepository
+import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
 import de.ericmuench.appsfactorytesttask.model.runtime.repository.network.ArtistSearchNetworkRepository
 import de.ericmuench.appsfactorytesttask.model.runtime.repository.network.RuntimeNetworkRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import java.lang.Exception
 
 /**
  * This object defines the global DataSource for the runtime Model. All Data is loaded from here.
@@ -25,9 +29,6 @@ class DataRepository(context : Context){
     private val artistSearchRepository = ArtistSearchNetworkRepository(apiClient)
     private val runtimeRepository = RuntimeNetworkRepository(apiClient)
     private val databaseRepository = DatabaseRepository(context)
-
-
-    //TODO: Add further fields for room and runtime cache
 
     //region Fields for Search of Artists
     /**This field caches the current Search-Query results and search states*/
@@ -93,5 +94,33 @@ class DataRepository(context : Context){
     }
     //endregion
 
+    //region functions for Database
+    suspend fun isAlbumStored(album: Album) : DataRepositoryResponse<Boolean,Throwable> = coroutineScope{
+        return@coroutineScope databaseRepository.isAlbumStored(album)
+    }
+
+    /**
+     * This function can store an Album in the local Database. Before it has to look up the Artist
+     * for the Album in the Cache of the Runtime-Repository.
+     *
+     * @param album The Album that should be stored(merged)
+     *
+     * @return A DataRepository-Response whether the Insert was successful or an Error
+     * */
+    suspend fun storeAlbum(album: Album) : DataRepositoryResponse<Boolean,Throwable> = coroutineScope {
+        val artistDef = async(Dispatchers.IO){
+            //loading artist for an album: Usually the artist should be in the cache of the runtime repo
+            //TODO: check if this is ok or if its better to fetch artist from network
+            runtimeRepository.getArtistByNameFromCache(album.artistName)
+        }
+
+        val artist = artistDef.await()
+            ?: return@coroutineScope DataRepositoryResponse.Error(
+                Exception("Album could not be stored. Artist could not be found")
+            )
+        return@coroutineScope databaseRepository.storeAlbumWithAssociatedData(album,artist)
+    }
+
+    //endregion
 
 }

@@ -59,7 +59,7 @@ class RuntimeNetworkRepository(apiClient: LastFmApiClient) : NetworkRepository(a
     ) : DataRepositoryResponse<Artist, Throwable> = coroutineScope{
         if(!shouldIgnoreRuntimeCache){
             //Do not ignore cache and get Data from it
-            val dataFromStorage = artistRuntimeStorage[name]
+            val dataFromStorage = getArtistByNameFromCache(name)
 
             if(dataFromStorage != null){
                 return@coroutineScope DataRepositoryResponse.Data(dataFromStorage)
@@ -80,6 +80,17 @@ class RuntimeNetworkRepository(apiClient: LastFmApiClient) : NetworkRepository(a
             }
             is Result.Failure -> return@coroutineScope DataRepositoryResponse.Error(webResult.error)
         }
+    }
+
+    /**
+     * This function searches for a certain artist in the Runtime-Storage.
+     *
+     * @param artistName The Name of the artist that should be searched
+     *
+     * @return The artist if existing, null otherwise
+     * */
+    suspend fun getArtistByNameFromCache(artistName : String) : Artist? = coroutineScope{
+        return@coroutineScope artistRuntimeStorage[artistName]
     }
 
     /**

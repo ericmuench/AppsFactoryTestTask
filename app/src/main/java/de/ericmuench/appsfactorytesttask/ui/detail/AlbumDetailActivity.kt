@@ -33,15 +33,21 @@ class AlbumDetailActivity : DetailActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //setup ViewModel
+        setupViewModel()
 
         //setup Layout
         setupLayout()
 
-        //setup ViewModel
-        setupViewModel()
-
         //apply intent data
         applyIntentDataOrFinish()
+
+        //do existence check
+        if(viewModel.isAlbumStored.value == null){
+            viewModel.detailData.value?.notNull { album ->
+                viewModel.checkAlbumExistence(album){handleError(it)}
+            }
+        }
 
     }
     //endregion
@@ -92,7 +98,7 @@ class AlbumDetailActivity : DetailActivity() {
 
     private fun setupFabAction(){
         setFabActionOnClickListener {
-            //TODO: Register Click Action for storing album
+            viewModel.switchStoreState{ handleError(it) }
         }
     }
     //endregion
@@ -124,6 +130,29 @@ class AlbumDetailActivity : DetailActivity() {
                     recyclerViewAdapter?.addElements(album.songs)
                 }
 
+            }
+        }
+
+        viewModel.isAlbumStored.observe(this){ isStoredData ->
+            if(isStoredData != null){
+                val fabDrawableId = if(isStoredData) R.drawable.ic_remove_circle else R.drawable.ic_save
+                val fabDrawable = ResourcesCompat.getDrawable(
+                    resources,
+                    fabDrawableId,
+                    null
+                )
+                setFabActionIconDrawable(fabDrawable)
+                setFabActionEnabled(true)
+            }
+            else{
+                setFabActionEnabled(false)
+            }
+
+        }
+
+        viewModel.isProcessing.observe(this){ loadingStateData ->
+            loadingStateData.notNull {
+                setFabActionEnabled(!loadingStateData.isLoading)
             }
         }
     }

@@ -6,9 +6,10 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import de.ericmuench.appsfactorytesttask.model.room.dao.AlbumDao
 import de.ericmuench.appsfactorytesttask.model.room.dao.ArtistDao
+import de.ericmuench.appsfactorytesttask.model.room.dao.SongDao
 
 @Database(
-    entities = [StoredAlbum::class, StoredSong::class, StoredArtist::class, StoredAlbumSongs::class],
+    entities = [StoredAlbum::class, StoredSong::class, StoredArtist::class, StoredAlbumSong::class],
     version = 1, exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -35,6 +36,7 @@ abstract class AppDatabase : RoomDatabase() {
     //region DAO Functions
     abstract fun albumDao() : AlbumDao
     abstract fun artistDao() : ArtistDao
+    abstract fun songDao() : SongDao
     //endregion
 
 }
