@@ -12,11 +12,15 @@ import android.widget.ProgressBar
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.reflect.KClass
 
 /**
- * This file contains helpful extensions for Android Components to reduce code e.g. in Activities.
+ * This file contains helpful extensions for Android Components to reduce code in Activities,
+ * Fragments and other Components.
  */
 
 //region Context Extensions
@@ -163,4 +167,33 @@ fun SearchView.removeSearchPlate() {
  * adapter of a RecyclerView.
  * */
 fun <VH : RecyclerView.ViewHolder> RecyclerView.Adapter<VH>.lastItemIndex() : Int = itemCount - 1
+//endregion
+
+//region LiveData Extensions
+/**
+ * This extension function can return a distinct LiveData-Value to avoid false-positive Refresh-
+ * Actions. This code was coped from the following tutorial:
+ *
+ * https://medium.com/androiddevelopers/7-pro-tips-for-room-fbadea4bfbd1
+ *
+ * */
+fun <T> LiveData<T>.getDistinct(): LiveData<T> {
+    val distinctLiveData = MediatorLiveData<T>()
+    distinctLiveData.addSource(this, object : Observer<T> {
+        private var initialized = false
+        private var lastObj: T? = null
+        override fun onChanged(obj: T?) {
+            if (!initialized) {
+                initialized = true
+                lastObj = obj
+                distinctLiveData.postValue(lastObj)
+            } else if ((obj == null && lastObj != null)
+                || obj != lastObj) {
+                lastObj = obj
+                distinctLiveData.postValue(lastObj)
+            }
+        }
+    })
+    return distinctLiveData
+}
 //endregion

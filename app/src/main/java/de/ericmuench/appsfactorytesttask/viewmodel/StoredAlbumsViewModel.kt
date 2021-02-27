@@ -8,12 +8,15 @@ import de.ericmuench.appsfactorytesttask.model.room.StoredAlbum
 import de.ericmuench.appsfactorytesttask.model.room.StoredAlbumInfo
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.util.errorhandling.OnErrorHandler
+import de.ericmuench.appsfactorytesttask.util.extensions.getDistinct
 import kotlinx.coroutines.launch
 
 class StoredAlbumsViewModel(private val repository: DataRepository) : ViewModel() {
 
     //region LiveData
-    val allStoredAlbums : LiveData<List<StoredAlbumInfo>> = repository.allStoredAlbumsInfoLiveData()
+    val allStoredAlbums : LiveData<List<StoredAlbumInfo>> = repository
+        .allStoredAlbumsInfoLiveData()
+        .getDistinct()
     //endregion
 
     //region Functions

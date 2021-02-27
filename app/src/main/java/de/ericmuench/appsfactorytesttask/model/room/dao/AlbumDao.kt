@@ -5,7 +5,6 @@ import androidx.room.*
 import de.ericmuench.appsfactorytesttask.model.room.StoredAlbum
 import de.ericmuench.appsfactorytesttask.model.room.StoredAlbumInfo
 import de.ericmuench.appsfactorytesttask.model.room.StoredAlbumSong
-import de.ericmuench.appsfactorytesttask.model.runtime.Album
 
 /**This DAO should provide functionality for managing albums of the local Database*/
 @Dao

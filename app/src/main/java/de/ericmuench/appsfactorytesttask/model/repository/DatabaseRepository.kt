@@ -65,13 +65,13 @@ class DatabaseRepository(
      * */
     suspend fun storeAlbumWithAssociatedData(
         album: Album,
-        artist : Artist
+        artist : Artist?
     ) : DataRepositoryResponse<Boolean, Throwable> = coroutineScope {
         val responseDef  = async(Dispatchers.IO){
             try {
                 //artist
-                val artistId = getStoredArtistIdByName(artist.artistName)
-                    ?: storeArtist(artist) //artistId is null --> need to store the artist and then return its id again
+                val artistId = getStoredArtistIdByName(album.artistName) //if returned artistId is null --> need to store the artist and then return its id again
+                    ?: artist?.let { storeArtist(it) }
                     ?: return@async DataRepositoryResponse.Error(
                         createThrowable(R.string.error_album_insert_impossible)
                     )
@@ -109,20 +109,18 @@ class DatabaseRepository(
      * have any Albums left).
      *
      * @param album The album to remove
-     * @param artist A corresponding Artist for the album
      *
      * @return A DataRepositoryResponse with either a success-indication or an Error that the unstore-
      * operation failed. False as a return type can be used in future implementations to maybe indicate
      * some other events.
      * */
     suspend fun unstoreAlbumWithAssociatedData(
-        album: Album,
-        artist : Artist
+        album: Album
     ) : DataRepositoryResponse<Boolean, Throwable> = coroutineScope {
         val responseDef  = async(Dispatchers.IO){
             try {
                 //get data
-                val artistId = getStoredArtistIdByName(artist.artistName)
+                val artistId = getStoredArtistIdByName(album.artistName)
                     ?: return@async DataRepositoryResponse.Error(
                         createThrowable(R.string.error_artist_not_found_in_db)
                     )
@@ -219,9 +217,10 @@ class DatabaseRepository(
     //region Functions for providing LiveData
     /**
      * This function returns LiveData from the Database containing AlbumInfo-Objects about all
-     * stored Albums
+     * stored Albums.
      * */
-    fun allStoredAlbumsLiveData() : LiveData<List<StoredAlbumInfo>> = albumDao.getAllAlbumsLiveData()
+    fun allStoredAlbumsLiveData() : LiveData<List<StoredAlbumInfo>>
+        = albumDao.getAllAlbumsLiveData()
     //endregion
 
     //region Help functions

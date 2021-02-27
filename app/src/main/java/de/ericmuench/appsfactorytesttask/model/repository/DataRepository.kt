@@ -12,7 +12,6 @@ import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
 import de.ericmuench.appsfactorytesttask.model.repository.network.ArtistSearchNetworkRepository
 import de.ericmuench.appsfactorytesttask.model.repository.network.RuntimeNetworkRepository
-import de.ericmuench.appsfactorytesttask.model.room.StoredAlbum
 import de.ericmuench.appsfactorytesttask.model.room.StoredAlbumInfo
 import de.ericmuench.appsfactorytesttask.util.errorhandling.ContextReferenceResourceExceptionGenerator
 import de.ericmuench.appsfactorytesttask.util.errorhandling.ResourceThrowableGenerator
@@ -123,11 +122,8 @@ class DataRepository(
             runtimeRepository.getArtistByNameFromCache(album.artistName)
         }
 
-        val artist = artistDef.await()
-            ?: return@coroutineScope DataRepositoryResponse.Error(
-                createThrowable(R.string.error_artist_not_found)
-            )
-        return@coroutineScope databaseRepository.storeAlbumWithAssociatedData(album,artist)
+
+        return@coroutineScope databaseRepository.storeAlbumWithAssociatedData(album,artistDef.await())
     }
 
 
@@ -140,17 +136,7 @@ class DataRepository(
      * @return A DataRepository-Response whether the Insert was successful or an Error
      * */
     suspend fun unstoreAlbum(album: Album) : DataRepositoryResponse<Boolean, Throwable> = coroutineScope {
-        val artistDef = async(Dispatchers.IO){
-            //loading artist for an album: Usually the artist should be in the cache of the runtime repo
-            //TODO: check if this is ok or if its better to fetch artist from network
-            runtimeRepository.getArtistByNameFromCache(album.artistName)
-        }
-
-        val artist = artistDef.await()
-            ?: return@coroutineScope DataRepositoryResponse.Error(
-                createThrowable(R.string.error_artist_not_found)
-            )
-        return@coroutineScope databaseRepository.unstoreAlbumWithAssociatedData(album,artist)
+        return@coroutineScope databaseRepository.unstoreAlbumWithAssociatedData(album)
     }
 
     /**
