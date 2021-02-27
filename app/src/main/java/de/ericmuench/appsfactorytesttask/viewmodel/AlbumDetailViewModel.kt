@@ -2,8 +2,8 @@ package de.ericmuench.appsfactorytesttask.viewmodel
 
 import androidx.lifecycle.*
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
-import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepository
-import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepositoryResponse
+import de.ericmuench.appsfactorytesttask.model.repository.DataRepository
+import de.ericmuench.appsfactorytesttask.model.repository.util.DataRepositoryResponse
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.abstract_viewmodels.DetailViewModel

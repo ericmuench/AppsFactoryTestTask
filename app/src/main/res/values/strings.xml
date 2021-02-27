@@ -7,16 +7,23 @@
     <string name="search_artists_hint">Search for an artist…</string>
     <string name="error">Error</string>
     <string name="warning">Warning</string>
-    <string name="error_template_try_again">An Error occurred:#Please try again!</string>
     <string name="clear_search_results">Clear Search Results</string>
     <string name="question_sure_clear_all_artist_search_results">Would you really like to delete all Artist-Search-Results?</string>
     <string name="more">More</string>
     <string name="navigate_back">Navigate Back</string>
     <string name="about_artist">About the Artist</string>
     <string name="about_album">About the Album</string>
-    <string name="no_description_available">No Description available.</string>
-    <string name="no_internet_connection">No internet Connection.</string>
     <string name="reload">Reload</string>
     <string name="album_cover">Album Cover</string>
     <string name="background_image">Background Image</string>
+
+    <!--Errors and Similar Strings-->
+    <string name="error_template_try_again">An Error occurred:#Please try again!</string>
+    <string name="no_description_available">No Description available.</string>
+    <string name="no_internet_connection">No internet Connection.</string>
+    <string name="error_album_insert_impossible">Unable to insert Artist into Database</string>
+    <string name="error_album_insert_failed">Album Insert failed!</string>
+    <string name="error_artist_not_found_in_db">Artist could not be found in Database!</string>
+    <string name="error_artist_not_found">Artist could not be found in Runtime-Storage</string>
+    <string name="error_album_not_found_in_db">Album could not be found in Database!</string>
 </resources>

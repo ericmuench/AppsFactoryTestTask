@@ -1,4 +1,4 @@
-package de.ericmuench.appsfactorytesttask.model.runtime.repository.network
+package de.ericmuench.appsfactorytesttask.model.repository.network
 
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 import kotlinx.coroutines.Dispatchers

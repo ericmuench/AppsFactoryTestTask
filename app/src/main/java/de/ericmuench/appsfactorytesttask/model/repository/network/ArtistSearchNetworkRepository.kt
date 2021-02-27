@@ -1,9 +1,11 @@
-package de.ericmuench.appsfactorytesttask.model.runtime.repository.network
+package de.ericmuench.appsfactorytesttask.model.repository.network
 
+import android.content.Context
 import com.github.kittinunf.result.Result
+import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
-import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepositoryResponse
+import de.ericmuench.appsfactorytesttask.model.repository.util.DataRepositoryResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -14,7 +16,10 @@ import java.io.IOException
  * This class defines a repository for providing all data associated with Searching an Artist
  * */
 
-class ArtistSearchNetworkRepository(apiClient : LastFmApiClient) : NetworkRepository(apiClient){
+class ArtistSearchNetworkRepository(
+    apiClient : LastFmApiClient,
+    context : Context
+) : NetworkRepository(apiClient,context){
     //region fields
     /**This field caches the current Search-Query results and search states*/
     private val artistSearchCache = ArtistSearchCache()
@@ -55,7 +60,9 @@ class ArtistSearchNetworkRepository(apiClient : LastFmApiClient) : NetworkReposi
 
         //There is no cached data available -> load data from network
         if(!hasInternet){
-            return@coroutineScope DataRepositoryResponse.Error(IOException("No Internet Connection"))
+            return@coroutineScope DataRepositoryResponse.Error(
+                createThrowable(R.string.no_internet_connection)
+            )
         }
 
         val resultDeferred = async(Dispatchers.IO) {

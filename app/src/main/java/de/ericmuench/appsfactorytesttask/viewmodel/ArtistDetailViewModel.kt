@@ -4,9 +4,8 @@ import androidx.lifecycle.*
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
-import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepository
-import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepositoryResponse
-import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
+import de.ericmuench.appsfactorytesttask.model.repository.DataRepository
+import de.ericmuench.appsfactorytesttask.model.repository.util.DataRepositoryResponse
 import de.ericmuench.appsfactorytesttask.util.errorhandling.OnErrorHandler
 import de.ericmuench.appsfactorytesttask.util.extensions.notNullSuspending
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState

@@ -1,14 +1,18 @@
-package de.ericmuench.appsfactorytesttask.model.runtime.repository
+package de.ericmuench.appsfactorytesttask.model.repository
 
 import android.content.Context
+import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
-import de.ericmuench.appsfactorytesttask.model.room.DatabaseRepository
+import de.ericmuench.appsfactorytesttask.model.repository.DatabaseRepository
+import de.ericmuench.appsfactorytesttask.model.repository.util.DataRepositoryResponse
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
-import de.ericmuench.appsfactorytesttask.model.runtime.repository.network.ArtistSearchNetworkRepository
-import de.ericmuench.appsfactorytesttask.model.runtime.repository.network.RuntimeNetworkRepository
+import de.ericmuench.appsfactorytesttask.model.repository.network.ArtistSearchNetworkRepository
+import de.ericmuench.appsfactorytesttask.model.repository.network.RuntimeNetworkRepository
+import de.ericmuench.appsfactorytesttask.util.errorhandling.ContextReferenceResourceExceptionGenerator
+import de.ericmuench.appsfactorytesttask.util.errorhandling.ResourceThrowableGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -21,13 +25,15 @@ import java.lang.Exception
  * is provided. For all that, the DataRepository uses internal Sub-Repositories and manages
  * their interaction with each other.
  */
-class DataRepository(context : Context){
+class DataRepository(
+    context : Context
+) : ResourceThrowableGenerator by ContextReferenceResourceExceptionGenerator(context) {
 
     //region fields
     /**This field is responsible for all network API-Calls*/
     private val apiClient = LastFmApiClient()
-    private val artistSearchRepository = ArtistSearchNetworkRepository(apiClient)
-    private val runtimeRepository = RuntimeNetworkRepository(apiClient)
+    private val artistSearchRepository = ArtistSearchNetworkRepository(apiClient,context)
+    private val runtimeRepository = RuntimeNetworkRepository(apiClient,context)
     private val databaseRepository = DatabaseRepository(context)
 
     //region Fields for Search of Artists
@@ -59,12 +65,12 @@ class DataRepository(context : Context){
         searchQuery : String,
         startPage : Int = 1,
         limitPerPage : Int = 10
-    ) : DataRepositoryResponse<ArtistSearchResult,Throwable> = coroutineScope{
+    ) : DataRepositoryResponse<ArtistSearchResult, Throwable> = coroutineScope{
         return@coroutineScope artistSearchRepository
             .searchForArtists(hasInternet,searchQuery, startPage, limitPerPage)
     }
 
-    suspend fun lastArtistSearchResult() : DataRepositoryResponse<List<ArtistSearchResult>,Throwable>
+    suspend fun lastArtistSearchResult() : DataRepositoryResponse<List<ArtistSearchResult>, Throwable>
         = coroutineScope{
         return@coroutineScope artistSearchRepository.lastArtistSearchResult()
     }
@@ -76,7 +82,7 @@ class DataRepository(context : Context){
         hasInternet : Boolean,
         mbid: String,
         shouldIgnoreRuntimeCache : Boolean = false
-    ) : DataRepositoryResponse<Artist,Throwable> = coroutineScope{
+    ) : DataRepositoryResponse<Artist, Throwable> = coroutineScope{
         return@coroutineScope runtimeRepository
             .getArtistByName(hasInternet,mbid,shouldIgnoreRuntimeCache)
     }
@@ -88,14 +94,14 @@ class DataRepository(context : Context){
         startPage : Int,
         limitPerPage : Int,
         shouldRefreshRuntimeCache : Boolean = false,
-    ): DataRepositoryResponse<TopAlbumOfArtistResult,Throwable> = coroutineScope{
+    ): DataRepositoryResponse<TopAlbumOfArtistResult, Throwable> = coroutineScope{
         return@coroutineScope runtimeRepository
             .getTopAlbumsByArtistName(hasInternet,artistName, startPage, limitPerPage,shouldRefreshRuntimeCache)
     }
     //endregion
 
     //region functions for Database
-    suspend fun isAlbumStored(album: Album) : DataRepositoryResponse<Boolean,Throwable> = coroutineScope{
+    suspend fun isAlbumStored(album: Album) : DataRepositoryResponse<Boolean, Throwable> = coroutineScope{
         return@coroutineScope databaseRepository.isAlbumStored(album)
     }
 
@@ -107,7 +113,7 @@ class DataRepository(context : Context){
      *
      * @return A DataRepository-Response whether the Insert was successful or an Error
      * */
-    suspend fun storeAlbum(album: Album) : DataRepositoryResponse<Boolean,Throwable> = coroutineScope {
+    suspend fun storeAlbum(album: Album) : DataRepositoryResponse<Boolean, Throwable> = coroutineScope {
         val artistDef = async(Dispatchers.IO){
             //loading artist for an album: Usually the artist should be in the cache of the runtime repo
             //TODO: check if this is ok or if its better to fetch artist from network
@@ -116,7 +122,7 @@ class DataRepository(context : Context){
 
         val artist = artistDef.await()
             ?: return@coroutineScope DataRepositoryResponse.Error(
-                Exception("Album could not be stored. Artist could not be found")
+                createThrowable(R.string.error_artist_not_found)
             )
         return@coroutineScope databaseRepository.storeAlbumWithAssociatedData(album,artist)
     }
@@ -130,7 +136,7 @@ class DataRepository(context : Context){
      *
      * @return A DataRepository-Response whether the Insert was successful or an Error
      * */
-    suspend fun unstoreAlbum(album: Album) : DataRepositoryResponse<Boolean,Throwable> = coroutineScope {
+    suspend fun unstoreAlbum(album: Album) : DataRepositoryResponse<Boolean, Throwable> = coroutineScope {
         val artistDef = async(Dispatchers.IO){
             //loading artist for an album: Usually the artist should be in the cache of the runtime repo
             //TODO: check if this is ok or if its better to fetch artist from network
@@ -139,7 +145,7 @@ class DataRepository(context : Context){
 
         val artist = artistDef.await()
             ?: return@coroutineScope DataRepositoryResponse.Error(
-                Exception("Album could not be stored. Artist could not be found")
+                createThrowable(R.string.error_artist_not_found)
             )
         return@coroutineScope databaseRepository.unstoreAlbumWithAssociatedData(album,artist)
     }

@@ -2,8 +2,7 @@ package de.ericmuench.appsfactorytesttask.app
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
-import de.ericmuench.appsfactorytesttask.model.room.AppDatabase
-import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepository
+import de.ericmuench.appsfactorytesttask.model.repository.DataRepository
 import de.ericmuench.appsfactorytesttask.util.connectivity.InternetConnectivityChecker
 
 class AppsFactoryTestTaskApplication : Application() {

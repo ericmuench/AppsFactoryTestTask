@@ -1,11 +1,13 @@
-package de.ericmuench.appsfactorytesttask.model.runtime.repository.network
+package de.ericmuench.appsfactorytesttask.model.repository.network
 
+import android.content.Context
 import com.github.kittinunf.result.Result
+import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
-import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepositoryResponse
+import de.ericmuench.appsfactorytesttask.model.repository.util.DataRepositoryResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -21,7 +23,10 @@ import java.io.IOException
  * storing searched Artists" only used for the Artist-Search-Screen whereas this class should store
  * the Artists fetched from Network in Context of the whole App.
  * */
-class RuntimeNetworkRepository(apiClient: LastFmApiClient) : NetworkRepository(apiClient){
+class RuntimeNetworkRepository(
+    apiClient: LastFmApiClient,
+    context : Context
+) : NetworkRepository(apiClient,context){
 
     //region fields
     /**
@@ -67,7 +72,9 @@ class RuntimeNetworkRepository(apiClient: LastFmApiClient) : NetworkRepository(a
         }
 
         if(!hasInternet){
-            return@coroutineScope DataRepositoryResponse.Error(IOException("No internet connection"))
+            return@coroutineScope DataRepositoryResponse.Error(
+                createThrowable(R.string.no_internet_connection)
+            )
         }
 
         //Load data from web and store it into storage if internet connection is available
@@ -137,7 +144,9 @@ class RuntimeNetworkRepository(apiClient: LastFmApiClient) : NetworkRepository(a
         }
 
         if(!hasInternet){
-            return@coroutineScope DataRepositoryResponse.Error(IOException("No internet connection"))
+            return@coroutineScope DataRepositoryResponse.Error(
+                createThrowable(R.string.no_internet_connection)
+            )
         }
 
         val topAlbumsResultFromWebDeferred = async(Dispatchers.IO){

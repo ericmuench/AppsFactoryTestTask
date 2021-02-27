@@ -1,4 +1,4 @@
-package de.ericmuench.appsfactorytesttask.ui.albumsoverview
+package de.ericmuench.appsfactorytesttask.ui.storedalbums
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.databinding.FragmentAlbumsOverviewBinding
-import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseFragment
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericImagedItemAdapter
 import de.ericmuench.appsfactorytesttask.util.extensions.runsInLandscape
@@ -19,7 +18,7 @@ import de.ericmuench.appsfactorytesttask.util.extensions.runsInLandscape
 /**
  * A simple [Fragment] subclass, that is responsible for displaying the locally stored albums.
  */
-class AlbumsOverviewFragment : BaseFragment() {
+class StoredAlbumsFragment : BaseFragment() {
 
     //region Fields
     private lateinit var viewBinding : FragmentAlbumsOverviewBinding

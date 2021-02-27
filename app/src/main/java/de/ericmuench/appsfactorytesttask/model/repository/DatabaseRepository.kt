@@ -1,16 +1,22 @@
-package de.ericmuench.appsfactorytesttask.model.room
+package de.ericmuench.appsfactorytesttask.model.repository
 
 import android.content.Context
+import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.clerk.mapper.RuntimeModelToDatabaseMapper
+import de.ericmuench.appsfactorytesttask.model.room.AppDatabase
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.Song
-import de.ericmuench.appsfactorytesttask.model.runtime.repository.DataRepositoryResponse
+import de.ericmuench.appsfactorytesttask.model.repository.util.DataRepositoryResponse
+import de.ericmuench.appsfactorytesttask.util.errorhandling.ContextReferenceResourceExceptionGenerator
+import de.ericmuench.appsfactorytesttask.util.errorhandling.ResourceThrowableGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
-class DatabaseRepository(context : Context) {
+class DatabaseRepository(
+    context : Context
+): ResourceThrowableGenerator by ContextReferenceResourceExceptionGenerator(context) {
     //region fields
     private val appDatabase = AppDatabase.getInstance(context)
 
@@ -56,18 +62,22 @@ class DatabaseRepository(context : Context) {
     suspend fun storeAlbumWithAssociatedData(
         album: Album,
         artist : Artist
-    ) : DataRepositoryResponse<Boolean,Throwable> = coroutineScope {
+    ) : DataRepositoryResponse<Boolean, Throwable> = coroutineScope {
         val responseDef  = async(Dispatchers.IO){
             try {
                 //artist
                 val artistId = getStoredArtistIdByName(artist.artistName)
                     ?: storeArtist(artist) //artistId is null --> need to store the artist and then return its id again
-                    ?: return@async DataRepositoryResponse.Error(Exception("Unable to insert Artist into Database"))
+                    ?: return@async DataRepositoryResponse.Error(
+                        createThrowable(R.string.error_album_insert_impossible)
+                    )
 
                 //album
                 val albumId = getAlbumIdByTitleAndArtistId(album,artistId)//getAlbumIdByParams(album)
                     ?: storeAlbum(album, artistId)
-                    ?: return@async DataRepositoryResponse.Error(Exception("Album Insert failed"))
+                    ?: return@async DataRepositoryResponse.Error(
+                        createThrowable(R.string.error_album_insert_failed)
+                    )
 
 
                 //link songs
@@ -87,18 +97,36 @@ class DatabaseRepository(context : Context) {
         responseDef.await()
     }
 
+
+    /**
+     * This function can unstore an Album in the Database. Be aware that this function might also
+     * delete additional Database-Entries if they are not needed anymore (Songs are deleted that are
+     * not associated with another Album and the corresponding Artist is deleted if he/she does not
+     * have any Albums left).
+     *
+     * @param album The album to remove
+     * @param artist A corresponding Artist for the album
+     *
+     * @return A DataRepositoryResponse with either a success-indication or an Error that the unstore-
+     * operation failed. False as a return type can be used in future implementations to maybe indicate
+     * some other events.
+     * */
     suspend fun unstoreAlbumWithAssociatedData(
         album: Album,
         artist : Artist
-    ) : DataRepositoryResponse<Boolean,Throwable> = coroutineScope {
+    ) : DataRepositoryResponse<Boolean, Throwable> = coroutineScope {
         val responseDef  = async(Dispatchers.IO){
             try {
                 //get data
                 val artistId = getStoredArtistIdByName(artist.artistName)
-                    ?: return@async DataRepositoryResponse.Error(Exception("Unable to find Artist in Database"))
+                    ?: return@async DataRepositoryResponse.Error(
+                        createThrowable(R.string.error_artist_not_found_in_db)
+                    )
 
                 val albumId = getAlbumIdByTitleAndArtistId(album,artistId)//getAlbumIdByParams(album)
-                    ?: return@async DataRepositoryResponse.Error(Exception("Album could not be found"))
+                    ?: return@async DataRepositoryResponse.Error(
+                        createThrowable(R.string.error_album_not_found_in_db)
+                    )
 
                 val storedSongIdsOfAlbum = songDao.getSongIdsByAlbumId(albumId)
 
