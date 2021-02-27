@@ -11,7 +11,7 @@ import de.ericmuench.appsfactorytesttask.app.AppsFactoryTestTaskApplication
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_TRANSFER_ALBUM
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Song
-import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericSimpleItemAdapter
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.viewmodel.AlbumDetailViewModel
 import de.ericmuench.appsfactorytesttask.viewmodel.AlbumsDetailViewModelFactory
@@ -116,6 +116,7 @@ class AlbumDetailActivity : DetailActivity() {
                             .load(album.imgUrl)
                             .centerCrop()
                             .placeholder(R.drawable.ic_album_loading)
+                            .error(R.drawable.ic_album_default_image)
                             .into(imgViewDetail)
                     }
                 }

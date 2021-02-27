@@ -6,22 +6,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.app.AppsFactoryTestTaskApplication
 import de.ericmuench.appsfactorytesttask.databinding.FragmentAlbumsOverviewBinding
-import de.ericmuench.appsfactorytesttask.model.room.StoredAlbum
 import de.ericmuench.appsfactorytesttask.model.room.StoredAlbumInfo
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseFragment
-import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericImagedItemAdapter
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.GenericImagedItemAdapter
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.listadapter.GenericImagedItemListAdapter
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.util.extensions.runsInLandscape
-import de.ericmuench.appsfactorytesttask.viewmodel.SearchArtistViewModelFactory
 import de.ericmuench.appsfactorytesttask.viewmodel.StoredAlbumsViewModel
 import de.ericmuench.appsfactorytesttask.viewmodel.StoredAlbumsViewModelFactory
 import kotlinx.coroutines.launch
@@ -38,7 +37,7 @@ class StoredAlbumsFragment : BaseFragment() {
     }
 
     private lateinit var viewBinding : FragmentAlbumsOverviewBinding
-    private var recyclerViewAdapter : GenericImagedItemAdapter<StoredAlbumInfo>? = null
+    private var recyclerViewAdapter : GenericImagedItemListAdapter<StoredAlbumInfo>? = null
     //endregion
 
     //region livecycle functions
@@ -72,7 +71,23 @@ class StoredAlbumsFragment : BaseFragment() {
 
         //adapter
         val context = context ?: return@with
-        recyclerViewAdapter = GenericImagedItemAdapter(context, emptyList())
+        recyclerViewAdapter = GenericImagedItemListAdapter<StoredAlbumInfo>(context,
+            object :DiffUtil.ItemCallback<StoredAlbumInfo>(){
+            override fun areItemsTheSame(
+                oldItem: StoredAlbumInfo,
+                newItem: StoredAlbumInfo
+            ): Boolean {
+                return oldItem.alid == newItem.alid
+            }
+
+            override fun areContentsTheSame(
+                oldItem: StoredAlbumInfo,
+                newItem: StoredAlbumInfo
+            ): Boolean {
+                return oldItem == newItem
+            }
+        })
+
         recyclerViewAdapter?.setOnApplyDataToViewHolder { holder, albumInfo, idx ->
             holder.cardView.setOnClickListener {
                 //TODO: open new screen with album
@@ -85,9 +100,9 @@ class StoredAlbumsFragment : BaseFragment() {
                         .load(imageUrl)
                         .centerCrop()
                         .placeholder(R.drawable.ic_album_loading)
+                        .error(R.drawable.ic_album_default_image)
                         .into(holder.imageView)
                 }
-
             }
 
             holder.txtTitle.text = albumInfo.title
@@ -104,8 +119,7 @@ class StoredAlbumsFragment : BaseFragment() {
             lifecycleScope.launch {
                 val newData = it ?: emptyList()
                 //TODO Change to more efficent imlementation later
-                recyclerViewAdapter?.clearElements()
-                recyclerViewAdapter?.addElements(newData)
+                recyclerViewAdapter?.submitList(newData)
             }
         }
     }

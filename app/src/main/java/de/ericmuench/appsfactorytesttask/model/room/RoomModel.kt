@@ -170,4 +170,24 @@ data class StoredAlbumInfo(
     val title : String,
     @ColumnInfo(name = "image_url") val imgUrl : String?,
     @ColumnInfo(name = "artist_name") val artistName : String
-)
+){
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is StoredAlbumInfo) return false
+
+        if (alid != other.alid) return false
+        if (title != other.title) return false
+        if (imgUrl != other.imgUrl) return false
+        if (artistName != other.artistName) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = alid.hashCode()
+        result = 31 * result + title.hashCode()
+        result = 31 * result + (imgUrl?.hashCode() ?: 0)
+        result = 31 * result + artistName.hashCode()
+        return result
+    }
+}

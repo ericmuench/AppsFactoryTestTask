@@ -1,14 +1,7 @@
-package de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview
+package de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter
 
 import android.content.Context
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import de.ericmuench.appsfactorytesttask.R
 
 /**
  * This class defines a Recyclerview-Adapter for generic purposes to bind arbitrary elements to
@@ -32,7 +25,7 @@ abstract class GenericRecyclerViewAdapter<Data,VH: RecyclerView.ViewHolder>(
      * element and the positions to apply your data to the basic UI-Components of the ViewHolder as
      * you like.
      * */
-    private var onApplyDataToViewHolder : GenericRecyclerViewAdapter<Data,VH>.(VH, Data, Int) -> Unit = {_,_,_ -> }
+    private var onApplyDataToViewHolder : GenericRecyclerViewAdapter<Data, VH>.(VH, Data, Int) -> Unit = { _, _, _ -> }
 
     //Functions for Adapter
 
@@ -48,7 +41,7 @@ abstract class GenericRecyclerViewAdapter<Data,VH: RecyclerView.ViewHolder>(
      * This function defines a FluentApi-Style-Setter for @see onApplyDataToViewHolder.
      * @param applyFunc The value that should be contained in @see onApplyDataToViewHolder
      */
-    fun setOnApplyDataToViewHolder(applyFunc : GenericRecyclerViewAdapter<Data,VH>.(VH, Data, Int) -> Unit) {
+    fun setOnApplyDataToViewHolder(applyFunc : GenericRecyclerViewAdapter<Data, VH>.(VH, Data, Int) -> Unit) {
         onApplyDataToViewHolder = applyFunc
     }
 

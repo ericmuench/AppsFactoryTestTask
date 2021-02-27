@@ -1,4 +1,4 @@
-package de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview
+package de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
