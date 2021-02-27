@@ -14,6 +14,7 @@ import de.ericmuench.appsfactorytesttask.util.errorhandling.ResourceThrowableGen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 
 private typealias AlbumWithAssociatedData = Triple<StoredAlbum, StoredArtist,List<StoredSong>>
 
@@ -154,10 +155,72 @@ class DatabaseRepository(
         responseDef.await()
     }
 
+
+    /**
+     * This function queries the Database for a certain ID for an Album and returns a corresponding
+     * StoredAlbum-Instance.
+     *
+     * @param albumId The Id of the Album to be searched in Database
+     * @return A DataRepositoryResponse with either the corresponding StoredAlbum or a Throwable-
+     * Object if there was an Error.
+     * */
+    suspend fun getAlbumById(
+        albumId : Long
+    ) : DataRepositoryResponse<StoredAlbum,Throwable> = coroutineScope{
+        val resultDef = async(Dispatchers.IO){
+            try {
+                val album = albumDao.getAlbumById(albumId)
+                    ?: return@async withContext(Dispatchers.Default){
+                        DataRepositoryResponse.Error(
+                            createThrowable(R.string.error_album_not_found_in_db)
+                        )
+                    }
+
+                DataRepositoryResponse.Data(album)
+            }
+            catch(ex : Exception){
+                withContext(Dispatchers.Default){
+                    DataRepositoryResponse.Error(
+                        createThrowable(R.string.error_album_not_found_in_db)
+                    )
+                }
+            }
+        }
+
+        return@coroutineScope resultDef.await()
+    }
+
+    /**
+     * This function returns all Songs of a specific Album based on the Id of the Album.
+     *
+     * @param albumId The Id of the Album where all songs should be contained in
+     * @return A DataRepositoryResponse either containing the Songs of an Album or a Throwable-Object
+     * if there was an Error.
+     * */
+    suspend fun getSongsByAlbumId(
+        albumId: Long
+    ) : DataRepositoryResponse<List<StoredSong>,Throwable> = coroutineScope {
+        return@coroutineScope withContext(Dispatchers.IO){
+            try {
+                val songs = songDao.getSongsByAlbumId(albumId)
+                DataRepositoryResponse.Data(songs)
+            }
+            catch(ex: Exception){
+                withContext(Dispatchers.Default){
+                    DataRepositoryResponse.Error(
+                        createThrowable(R.string.error_songs_could_not_be_loaded)
+                    )
+                }
+            }
+        }
+    }
     //endregion
 
     //region Functions for providing LiveData
-    //TODO: Doc
+    /**
+     * This function returns LiveData from the Database containing AlbumInfo-Objects about all
+     * stored Albums
+     * */
     fun allStoredAlbumsLiveData() : LiveData<List<StoredAlbumInfo>> = albumDao.getAllAlbumsLiveData()
     //endregion
 
@@ -212,8 +275,12 @@ class DatabaseRepository(
             //the album to be inserted and the artist matches
             val checkFetch = albumDao.getAlbumById(idFromGenerator)
             return@async idFromGenerator.takeIf {
-                val albumMatch = checkFetch.size == 1 && checkFetch.first().equals(album)
-                val artistsForCheckFetch = artistDao.getArtistsById(checkFetch.first().artistId)
+                if(checkFetch == null){
+                    return@takeIf false
+                }
+
+                val albumMatch = checkFetch.equals(album)
+                val artistsForCheckFetch = artistDao.getArtistsById(checkFetch.artistId)
                 val artistMatch = artistsForCheckFetch.size == 1
                         && artistsForCheckFetch.first().arid == artistId
 

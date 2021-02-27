@@ -16,7 +16,7 @@ class DatabaseModelToRuntimeMapper {
         onlineUrl = dbSong.onlineUrl
     )
 
-    fun mapAlbum(dbAlbum : StoredAlbum, artistName : String, songs: List<Song>) : Album = Album(
+    fun mapAlbumWithRuntimeSongs(dbAlbum : StoredAlbum, artistName : String, songs: List<Song>) : Album = Album(
         mbid = dbAlbum.mbid,
         title = dbAlbum.title,
         description = dbAlbum.description,
@@ -25,5 +25,10 @@ class DatabaseModelToRuntimeMapper {
         artistName = artistName,
         songs = songs
     )
+
+
+    fun mapAlbum(dbAlbum : StoredAlbum, artistName : String, songs: List<StoredSong>) : Album{
+        return  mapAlbumWithRuntimeSongs(dbAlbum,artistName,songs.map { mapSong(it) })
+    }
     //endregion
 }

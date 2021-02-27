@@ -24,8 +24,7 @@ abstract class AlbumDao : BaseDao<StoredAlbum>{
 
     //region Functions
     @Query("SELECT * FROM albums WHERE alid == :id;")
-    abstract fun getAlbumById(id : Long) : List<StoredAlbum>
-
+    abstract fun getAlbumById(id : Long) : StoredAlbum?
 
     @Query("""SELECT DISTINCT albums.alid, albums.title, albums.image_url ,artists.artist_name
                    FROM albums JOIN artists ON albums.artist_id == artists.arid;""")

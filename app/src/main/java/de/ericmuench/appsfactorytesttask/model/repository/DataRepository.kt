@@ -3,6 +3,7 @@ package de.ericmuench.appsfactorytesttask.model.repository
 import android.content.Context
 import androidx.lifecycle.LiveData
 import de.ericmuench.appsfactorytesttask.R
+import de.ericmuench.appsfactorytesttask.clerk.mapper.DatabaseModelToRuntimeMapper
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
 import de.ericmuench.appsfactorytesttask.model.repository.util.DataRepositoryResponse
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
@@ -18,6 +19,7 @@ import de.ericmuench.appsfactorytesttask.util.errorhandling.ResourceThrowableGen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import java.lang.Exception
 
 /**
  * This object defines the global DataSource for the runtime Model. All Data is loaded from here.
@@ -151,15 +153,66 @@ class DataRepository(
         return@coroutineScope databaseRepository.unstoreAlbumWithAssociatedData(album,artist)
     }
 
-    //TODO: Doc
-    fun allStoredAlbumsLiveData() : LiveData<List<StoredAlbumInfo>> {
-        val liveData = databaseRepository
-            .allStoredAlbumsLiveData()
+    /**
+     * This function creates an Album-Object based on the Information from the Database and the
+     * and the given Id from the AlbumInfo.
+     * @param albumInfo An AlbumInfo containing an Id for getting Album-Information from DB
+     *
+     * @return A DataRepository-Response with a valid album or a throwable if an error occurred.
+     * */
+    suspend fun getAlbumByStoredAlbumInfo(
+        albumInfo : StoredAlbumInfo
+    ) : DataRepositoryResponse<Album,Throwable> = coroutineScope{
 
-        println("got livedata $liveData")
-        return liveData
+        val resultDef = async{
+            try{
+                val albumId = albumInfo.alid
+                //starting coroutines
+                val storedAlbumResultDef = async{
+                    databaseRepository.getAlbumById(albumId)
+                }
+
+                val songsResultDef = async{
+                    databaseRepository.getSongsByAlbumId(albumId)
+                }
+
+                //awaiting coroutines + error handling
+                val storedAlbumResult = storedAlbumResultDef.await()
+                return@async when(storedAlbumResult){
+                    is DataRepositoryResponse.Error -> {
+                        songsResultDef.cancel()
+                        storedAlbumResult
+                    }
+                    is DataRepositoryResponse.Data -> {
+
+                        when(val songsResult = songsResultDef.await()){
+                            is DataRepositoryResponse.Error ->  songsResult
+                            is DataRepositoryResponse.Data -> {
+                                //creating album
+                                val dataMapper = DatabaseModelToRuntimeMapper()
+                                val mapped = dataMapper.mapAlbum(
+                                    storedAlbumResult.value,
+                                    albumInfo.artistName,
+                                    songsResult.value)
+                                DataRepositoryResponse.Data(mapped)
+                            }
+                        }
+                    }
+                }
+            }
+            catch(ex: Exception){
+                return@async DataRepositoryResponse.Error(ex)
+            }
+        }
+        return@coroutineScope resultDef.await()
     }
 
+    /**
+     * This function returns LiveData from the Database containing AlbumInfo-Objects about all
+     * stored Albums
+     * */
+    fun allStoredAlbumsInfoLiveData() : LiveData<List<StoredAlbumInfo>> = databaseRepository
+        .allStoredAlbumsLiveData()
     //endregion
 
 }

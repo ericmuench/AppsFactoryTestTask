@@ -14,12 +14,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.app.AppsFactoryTestTaskApplication
+import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_TRANSFER_ALBUM
 import de.ericmuench.appsfactorytesttask.databinding.FragmentAlbumsOverviewBinding
 import de.ericmuench.appsfactorytesttask.model.room.StoredAlbumInfo
+import de.ericmuench.appsfactorytesttask.ui.detail.AlbumDetailActivity
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseFragment
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.listadapter.GenericImagedItemListAdapter
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.util.extensions.runsInLandscape
+import de.ericmuench.appsfactorytesttask.util.extensions.switchToActivity
 import de.ericmuench.appsfactorytesttask.viewmodel.StoredAlbumsViewModel
 import de.ericmuench.appsfactorytesttask.viewmodel.StoredAlbumsViewModelFactory
 import kotlinx.coroutines.launch
@@ -89,8 +92,11 @@ class StoredAlbumsFragment : BaseFragment() {
 
         recyclerViewAdapter?.setOnApplyDataToViewHolder { holder, albumInfo, idx ->
             holder.cardView.setOnClickListener {
-                //TODO: open new screen with album
-                Toast.makeText(context,"$albumInfo clicked",Toast.LENGTH_SHORT).show()
+                viewModel.withFullAlbumForInfo(albumInfo,{ handleError(it) }){ album ->
+                    switchToActivity<AlbumDetailActivity>{
+                        putExtra(INTENT_KEY_TRANSFER_ALBUM,album)
+                    }
+                }
             }
 
             albumInfo.imgUrl.notNull { imageUrl ->
@@ -117,7 +123,6 @@ class StoredAlbumsFragment : BaseFragment() {
         allStoredAlbums.observe(viewLifecycleOwner){
             lifecycleScope.launch {
                 val newData = it ?: emptyList()
-                //TODO Change to more efficent imlementation later
                 recyclerViewAdapter?.submitList(newData)
             }
         }

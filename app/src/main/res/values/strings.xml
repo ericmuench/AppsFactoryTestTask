@@ -26,4 +26,5 @@
     <string name="error_artist_not_found_in_db">Artist could not be found in Database!</string>
     <string name="error_artist_not_found">Artist could not be found in Runtime-Storage</string>
     <string name="error_album_not_found_in_db">Album could not be found in Database!</string>
+    <string name="error_songs_could_not_be_loaded">Songs of the Album could not be loaded.</string>
 </resources>

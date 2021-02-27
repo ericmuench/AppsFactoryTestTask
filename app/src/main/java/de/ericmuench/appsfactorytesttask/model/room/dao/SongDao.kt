@@ -2,6 +2,7 @@ package de.ericmuench.appsfactorytesttask.model.room.dao
 
 import androidx.room.*
 import de.ericmuench.appsfactorytesttask.model.room.StoredSong
+import de.ericmuench.appsfactorytesttask.model.runtime.Song
 
 @Dao
 /**
@@ -55,6 +56,11 @@ abstract class SongDao : BaseDao<StoredSong>{
 
     @Query("SELECT DISTINCT song_id FROM album_songs WHERE album_id == :albumId;")
     abstract fun getSongIdsByAlbumId(albumId : Long) : List<Long>
+
+    @Query("""SELECT DISTINCT songs.sid, songs.title, songs.online_url 
+                   FROM album_songs JOIN songs ON album_songs.song_id == songs.sid
+                   WHERE album_songs.album_id == :albumId;""")
+    abstract fun getSongsByAlbumId(albumId :Long) : List<StoredSong>
 
     @Query("DELETE FROM songs;")
     abstract fun deleteAllSongs()
