@@ -3,6 +3,7 @@ package de.ericmuench.appsfactorytesttask.model.room.dao
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import de.ericmuench.appsfactorytesttask.model.room.StoredAlbum
+import de.ericmuench.appsfactorytesttask.model.room.StoredAlbumInfo
 import de.ericmuench.appsfactorytesttask.model.room.StoredAlbumSong
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 
@@ -25,8 +26,10 @@ abstract class AlbumDao : BaseDao<StoredAlbum>{
     @Query("SELECT * FROM albums WHERE alid == :id;")
     abstract fun getAlbumById(id : Long) : List<StoredAlbum>
 
-    @Query("SELECT * FROM albums;")
-    abstract fun getAllAlbumsLiveData() : LiveData<List<StoredAlbum>>
+
+    @Query("""SELECT DISTINCT albums.alid, albums.title, albums.image_url ,artists.artist_name
+                   FROM albums JOIN artists ON albums.artist_id == artists.arid;""")
+    abstract fun getAllAlbumsLiveData() : LiveData<List<StoredAlbumInfo>>
 
     @Query("SELECT alid FROM albums WHERE title LIKE :albumTitle;")
     abstract fun getAlbumIdsByTitle(albumTitle : String) : List<Long>

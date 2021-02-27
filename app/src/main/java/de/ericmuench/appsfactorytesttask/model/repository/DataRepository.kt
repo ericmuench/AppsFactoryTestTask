@@ -1,9 +1,9 @@
 package de.ericmuench.appsfactorytesttask.model.repository
 
 import android.content.Context
+import androidx.lifecycle.LiveData
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
-import de.ericmuench.appsfactorytesttask.model.repository.DatabaseRepository
 import de.ericmuench.appsfactorytesttask.model.repository.util.DataRepositoryResponse
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
@@ -11,12 +11,13 @@ import de.ericmuench.appsfactorytesttask.model.runtime.ArtistSearchResult
 import de.ericmuench.appsfactorytesttask.model.runtime.TopAlbumOfArtistResult
 import de.ericmuench.appsfactorytesttask.model.repository.network.ArtistSearchNetworkRepository
 import de.ericmuench.appsfactorytesttask.model.repository.network.RuntimeNetworkRepository
+import de.ericmuench.appsfactorytesttask.model.room.StoredAlbum
+import de.ericmuench.appsfactorytesttask.model.room.StoredAlbumInfo
 import de.ericmuench.appsfactorytesttask.util.errorhandling.ContextReferenceResourceExceptionGenerator
 import de.ericmuench.appsfactorytesttask.util.errorhandling.ResourceThrowableGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import java.lang.Exception
 
 /**
  * This object defines the global DataSource for the runtime Model. All Data is loaded from here.
@@ -148,6 +149,15 @@ class DataRepository(
                 createThrowable(R.string.error_artist_not_found)
             )
         return@coroutineScope databaseRepository.unstoreAlbumWithAssociatedData(album,artist)
+    }
+
+    //TODO: Doc
+    fun allStoredAlbumsLiveData() : LiveData<List<StoredAlbumInfo>> {
+        val liveData = databaseRepository
+            .allStoredAlbumsLiveData()
+
+        println("got livedata $liveData")
+        return liveData
     }
 
     //endregion

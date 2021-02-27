@@ -1,10 +1,7 @@
 package de.ericmuench.appsfactorytesttask.model.room
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.ForeignKey
+import androidx.room.*
 import androidx.room.ForeignKey.CASCADE
-import androidx.room.PrimaryKey
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.Song
@@ -167,3 +164,10 @@ data class StoredAlbumSong(
     @ColumnInfo(name = "album_id") val albumId : Long
 )
 
+
+data class StoredAlbumInfo(
+    @PrimaryKey val alid: Long,
+    val title : String,
+    @ColumnInfo(name = "image_url") val imgUrl : String?,
+    @ColumnInfo(name = "artist_name") val artistName : String
+)

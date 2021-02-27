@@ -1,18 +1,21 @@
 package de.ericmuench.appsfactorytesttask.model.repository
 
 import android.content.Context
+import androidx.lifecycle.LiveData
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.clerk.mapper.RuntimeModelToDatabaseMapper
-import de.ericmuench.appsfactorytesttask.model.room.AppDatabase
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.model.runtime.Song
 import de.ericmuench.appsfactorytesttask.model.repository.util.DataRepositoryResponse
+import de.ericmuench.appsfactorytesttask.model.room.*
 import de.ericmuench.appsfactorytesttask.util.errorhandling.ContextReferenceResourceExceptionGenerator
 import de.ericmuench.appsfactorytesttask.util.errorhandling.ResourceThrowableGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+
+private typealias AlbumWithAssociatedData = Triple<StoredAlbum, StoredArtist,List<StoredSong>>
 
 class DatabaseRepository(
     context : Context
@@ -150,6 +153,12 @@ class DatabaseRepository(
 
         responseDef.await()
     }
+
+    //endregion
+
+    //region Functions for providing LiveData
+    //TODO: Doc
+    fun allStoredAlbumsLiveData() : LiveData<List<StoredAlbumInfo>> = albumDao.getAllAlbumsLiveData()
     //endregion
 
     //region Help functions
@@ -258,6 +267,7 @@ class DatabaseRepository(
     }
 
     /**This function works similar to getStoredArtistIdByName but for Albums*/
+    @Deprecated("This function should not be used anymore because Artist is not checked")
     private suspend fun getAlbumIdByParams(album : Album) : Long? = coroutineScope{
         val albumIdDef = async(Dispatchers.IO){
             albumDao.getAlbumIdsByParams(album.title,album.mbid,album.description,album.onlineUrl,album.imgUrl)

@@ -69,15 +69,19 @@ abstract class GenericRecyclerViewAdapter<Data,VH: RecyclerView.ViewHolder>(
      * @return Whether the add-operation was successful or not
      */
     fun addElements(elements : Collection<Data>) : Boolean{
-        if(elements.isEmpty()){
-            return false
+        return when(elements.size){
+            0 -> false
+            1 -> addElement(elements.first())
+            else -> {
+                val oldLastIndex = data.lastIndex
+                val success = data.addAll(elements)
+
+                if(success && elements.size > 1){
+                    notifyItemRangeInserted(oldLastIndex+1,data.lastIndex)
+                }
+                success
+            }
         }
-        val oldLastIndex = data.lastIndex
-        val success = data.addAll(elements)
-        if(success){
-            notifyItemRangeInserted(oldLastIndex+1,data.lastIndex)
-        }
-        return success
     }
 
 

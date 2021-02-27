@@ -7,13 +7,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import de.ericmuench.appsfactorytesttask.R
+import de.ericmuench.appsfactorytesttask.app.AppsFactoryTestTaskApplication
 import de.ericmuench.appsfactorytesttask.databinding.FragmentAlbumsOverviewBinding
+import de.ericmuench.appsfactorytesttask.model.room.StoredAlbum
+import de.ericmuench.appsfactorytesttask.model.room.StoredAlbumInfo
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseFragment
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.GenericImagedItemAdapter
+import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.util.extensions.runsInLandscape
+import de.ericmuench.appsfactorytesttask.viewmodel.SearchArtistViewModelFactory
+import de.ericmuench.appsfactorytesttask.viewmodel.StoredAlbumsViewModel
+import de.ericmuench.appsfactorytesttask.viewmodel.StoredAlbumsViewModelFactory
+import kotlinx.coroutines.launch
 
 /**
  * A simple [Fragment] subclass, that is responsible for displaying the locally stored albums.
@@ -21,8 +32,13 @@ import de.ericmuench.appsfactorytesttask.util.extensions.runsInLandscape
 class StoredAlbumsFragment : BaseFragment() {
 
     //region Fields
+    private val viewModel : StoredAlbumsViewModel by viewModels {
+        val application = requireActivity().application as AppsFactoryTestTaskApplication
+        StoredAlbumsViewModelFactory(application.dataRepository)
+    }
+
     private lateinit var viewBinding : FragmentAlbumsOverviewBinding
-    private var recyclerViewAdapter : GenericImagedItemAdapter<Int>? = null
+    private var recyclerViewAdapter : GenericImagedItemAdapter<StoredAlbumInfo>? = null
     //endregion
 
     //region livecycle functions
@@ -38,6 +54,7 @@ class StoredAlbumsFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
+        setupViewModel()
 
     }
     //endregion
@@ -54,24 +71,43 @@ class StoredAlbumsFragment : BaseFragment() {
         }
 
         //adapter
-        //TODO: Replace dummy
         val context = context ?: return@with
-        val dummy = List(20){it+1}
-        recyclerViewAdapter = GenericImagedItemAdapter(context,dummy)
-        recyclerViewAdapter?.setOnApplyDataToViewHolder { holder, element, idx ->
-            //TODO: Change to real apply code
+        recyclerViewAdapter = GenericImagedItemAdapter(context, emptyList())
+        recyclerViewAdapter?.setOnApplyDataToViewHolder { holder, albumInfo, idx ->
             holder.cardView.setOnClickListener {
-                Toast.makeText(context,"$element clicked",Toast.LENGTH_SHORT).show()
+                //TODO: open new screen with album
+                Toast.makeText(context,"$albumInfo clicked",Toast.LENGTH_SHORT).show()
             }
 
-            val draw = ResourcesCompat.getDrawable(resources,R.drawable.ic_person_profile_pic,null)
-            holder.imageView.setImageDrawable(draw)
+            albumInfo.imgUrl.notNull { imageUrl ->
+                lifecycleScope.launch {
+                    Glide.with(context)
+                        .load(imageUrl)
+                        .centerCrop()
+                        .placeholder(R.drawable.ic_album_loading)
+                        .into(holder.imageView)
+                }
 
-            holder.txtTitle.text = "Title #$element"
-            holder.txtSubTitle.text = "Subtitle #$element"
+            }
+
+            holder.txtTitle.text = albumInfo.title
+            holder.txtSubTitle.text = albumInfo.artistName
         }
 
         recyclerviewAlbumsOverview.adapter = recyclerViewAdapter
+    }
+    //endregion
+
+    //region Functions for ViewModel-Setup
+    private fun setupViewModel() = with(viewModel){
+        allStoredAlbums.observe(viewLifecycleOwner){
+            lifecycleScope.launch {
+                val newData = it ?: emptyList()
+                //TODO Change to more efficent imlementation later
+                recyclerViewAdapter?.clearElements()
+                recyclerViewAdapter?.addElements(newData)
+            }
+        }
     }
     //endregion
 }
