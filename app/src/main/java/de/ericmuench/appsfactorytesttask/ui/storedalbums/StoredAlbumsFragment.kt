@@ -17,7 +17,6 @@ import de.ericmuench.appsfactorytesttask.app.AppsFactoryTestTaskApplication
 import de.ericmuench.appsfactorytesttask.databinding.FragmentAlbumsOverviewBinding
 import de.ericmuench.appsfactorytesttask.model.room.StoredAlbumInfo
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseFragment
-import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.GenericImagedItemAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.listadapter.GenericImagedItemListAdapter
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.util.extensions.runsInLandscape

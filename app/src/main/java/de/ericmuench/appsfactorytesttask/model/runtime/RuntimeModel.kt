@@ -44,13 +44,55 @@ data class Album(
     val imgUrl : String?,
     val artistName : String,
     val songs: List<Song>
-) : Parcelable
+) : Parcelable{
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Album) return false
+
+        if (mbid != other.mbid) return false
+        if (title != other.title) return false
+        if (description != other.description) return false
+        if (onlineUrl != other.onlineUrl) return false
+        if (imgUrl != other.imgUrl) return false
+        if (artistName != other.artistName) return false
+        if (songs != other.songs) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = mbid?.hashCode() ?: 0
+        result = 31 * result + title.hashCode()
+        result = 31 * result + description.hashCode()
+        result = 31 * result + (onlineUrl?.hashCode() ?: 0)
+        result = 31 * result + (imgUrl?.hashCode() ?: 0)
+        result = 31 * result + artistName.hashCode()
+        result = 31 * result + songs.hashCode()
+        return result
+    }
+}
 
 @Parcelize
 data class Song(
     val title: String,
     val onlineUrl: String?
-) : Parcelable
+) : Parcelable{
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Song) return false
+
+        if (title != other.title) return false
+        if (onlineUrl != other.onlineUrl) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = title.hashCode()
+        result = 31 * result + (onlineUrl?.hashCode() ?: 0)
+        return result
+    }
+}
 
 
 data class ArtistSearchResult(

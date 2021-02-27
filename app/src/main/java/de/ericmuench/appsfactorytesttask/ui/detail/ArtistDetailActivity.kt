@@ -3,13 +3,15 @@ package de.ericmuench.appsfactorytesttask.ui.detail
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.core.content.res.ResourcesCompat
+import androidx.recyclerview.widget.DiffUtil
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.app.AppsFactoryTestTaskApplication
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_SEARCH_ARTIST_TO_ARTIST_DETAIL_TRANSFERRED_ARTIST
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_TRANSFER_ALBUM
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
-import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.GenericSimpleItemAdapter
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.legacy.GenericSimpleItemAdapter
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.listadapter.GenericSimpleItemListAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.scrolling.NestedScrollViewPositionDetector
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.util.extensions.switchToActivity
@@ -27,7 +29,7 @@ class ArtistDetailActivity : DetailActivity() {
     }
 
 
-    private var recyclerViewAdapter : GenericSimpleItemAdapter<Album>? = null
+    private var recyclerViewAdapter : GenericSimpleItemListAdapter<Album>? = null
     private val scrollViewPositionDetector = NestedScrollViewPositionDetector().apply {
         onEndReached = {
             val hasInternet = internetConnectivityChecker
@@ -83,28 +85,39 @@ class ArtistDetailActivity : DetailActivity() {
     override fun setupRecyclerView() {
         super.setupRecyclerView()
         //recyclerView-Adapter
-        recyclerViewAdapter = GenericSimpleItemAdapter<Album>(this,viewModel.allTopAlbums).apply {
-            setOnApplyDataToViewHolder { holder, album, _ ->
-                val drawableStore = ResourcesCompat.getDrawable(resources,R.drawable.ic_save,null)
-                val drawableUnStore = ResourcesCompat.getDrawable(resources,R.drawable.ic_remove_circle,null)
-                holder.imageButton.setImageDrawable(drawableStore)
-                holder.imageButton.setOnClickListener {
-                    //TODO: Change action
-                    if(holder.imageButton.drawable == drawableStore){
-                        holder.imageButton.setImageDrawable(drawableUnStore)
-                        return@setOnClickListener
-                    }
-
-                    holder.imageButton.setImageDrawable(drawableStore)
+        recyclerViewAdapter = GenericSimpleItemListAdapter<Album>(
+            this,
+            object: DiffUtil.ItemCallback<Album>(){
+                override fun areItemsTheSame(oldItem: Album, newItem: Album): Boolean {
+                    return oldItem == newItem
                 }
 
+                override fun areContentsTheSame(oldItem: Album, newItem: Album): Boolean {
+                    return oldItem == newItem
+                }
+            }
+        )
+
+        recyclerViewAdapter?.setOnApplyDataToViewHolder { holder, album, _ ->
+            val drawableStore = ResourcesCompat.getDrawable(resources,R.drawable.ic_save,null)
+            val drawableUnStore = ResourcesCompat.getDrawable(resources,R.drawable.ic_remove_circle,null)
+            holder.imageButton.setImageDrawable(drawableStore)
+            holder.imageButton.setOnClickListener {
+                //TODO: Change action
+                if(holder.imageButton.drawable == drawableStore){
+                    holder.imageButton.setImageDrawable(drawableUnStore)
+                    return@setOnClickListener
+                }
+
+                holder.imageButton.setImageDrawable(drawableStore)
+            }
 
 
-                holder.txtText.text = album.title
-                holder.cardView.setOnClickListener {
-                    switchToActivity<AlbumDetailActivity>(){
-                        putExtra(INTENT_KEY_TRANSFER_ALBUM,album)
-                    }
+
+            holder.txtText.text = album.title
+            holder.cardView.setOnClickListener {
+                switchToActivity<AlbumDetailActivity>(){
+                    putExtra(INTENT_KEY_TRANSFER_ALBUM,album)
                 }
             }
         }
@@ -138,13 +151,7 @@ class ArtistDetailActivity : DetailActivity() {
         viewModel.topAlbumResults.observe(this){
             recyclerViewAdapter.notNull { recAdapter ->
                 val allTopAlbums = viewModel.allTopAlbums
-                if(recAdapter.itemCount < allTopAlbums.size){
-                    //add data
-                    recAdapter.addElements(allTopAlbums.subList(recAdapter.itemCount,allTopAlbums.size))
-                }
-                else if(recAdapter.itemCount > allTopAlbums.size){
-                    //TODO: Remove/Reassign data
-                }
+                recAdapter.submitList(allTopAlbums)
             }
         }
 

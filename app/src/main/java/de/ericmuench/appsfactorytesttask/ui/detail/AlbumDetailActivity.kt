@@ -5,13 +5,15 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DiffUtil
 import com.bumptech.glide.Glide
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.app.AppsFactoryTestTaskApplication
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_TRANSFER_ALBUM
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Song
-import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.GenericSimpleItemAdapter
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.legacy.GenericSimpleItemAdapter
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.listadapter.GenericSimpleItemListAdapter
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.viewmodel.AlbumDetailViewModel
 import de.ericmuench.appsfactorytesttask.viewmodel.AlbumsDetailViewModelFactory
@@ -25,7 +27,7 @@ class AlbumDetailActivity : DetailActivity() {
         AlbumsDetailViewModelFactory(app.dataRepository)
     }
 
-    private var recyclerViewAdapter : GenericSimpleItemAdapter<Song>? = null
+    private var recyclerViewAdapter : GenericSimpleItemListAdapter<Song>? = null
     //endregion
 
 
@@ -76,16 +78,27 @@ class AlbumDetailActivity : DetailActivity() {
 
     override fun setupRecyclerView() {
         super.setupRecyclerView()
-        recyclerViewAdapter = GenericSimpleItemAdapter<Song>(this, emptyList()).apply {
-            setOnApplyDataToViewHolder { holder, song, _ ->
-                holder.cardView.setOnClickListener {
-                    song.onlineUrl.notNull {songUrl ->
-                        openWebUrl(songUrl)
-                    }
+        recyclerViewAdapter = GenericSimpleItemListAdapter<Song>(
+            this,
+            object : DiffUtil.ItemCallback<Song>(){
+                override fun areItemsTheSame(oldItem: Song, newItem: Song): Boolean {
+                    return oldItem == newItem
                 }
-                holder.imageButton.visibility = View.GONE
-                holder.txtText.text = song.title
+
+                override fun areContentsTheSame(oldItem: Song, newItem: Song): Boolean {
+                    return oldItem == newItem
+                }
             }
+        )
+
+        recyclerViewAdapter?.setOnApplyDataToViewHolder { holder, song, _ ->
+            holder.cardView.setOnClickListener {
+                song.onlineUrl.notNull {songUrl ->
+                    openWebUrl(songUrl)
+                }
+            }
+            holder.imageButton.visibility = View.GONE
+            holder.txtText.text = song.title
         }
 
         recyclerView.adapter = recyclerViewAdapter
@@ -127,9 +140,11 @@ class AlbumDetailActivity : DetailActivity() {
                     .takeIf { it.isNotBlank() }
                     ?: resources.getString(R.string.no_description_available)
                 setDescription(description)
-                if(recyclerViewAdapter?.itemCount == 0){
+
+                recyclerViewAdapter?.submitList(album.songs)
+                /*if(recyclerViewAdapter?.itemCount == 0){
                     recyclerViewAdapter?.addElements(album.songs)
-                }
+                }*/
 
             }
         }

@@ -11,6 +11,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import de.ericmuench.appsfactorytesttask.R
 
+/**
+ * This class defines a Recyclerview-List-Adapter for a Imaged Item as available in generic_imaged_item.xml
+ * */
 class GenericImagedItemListAdapter<T>(
     context: Context,
     diffUtilCallback : DiffUtil.ItemCallback<T>,

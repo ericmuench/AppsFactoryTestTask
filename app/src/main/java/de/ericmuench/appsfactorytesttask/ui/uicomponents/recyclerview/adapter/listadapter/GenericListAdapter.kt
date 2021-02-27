@@ -5,6 +5,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
+/**
+ * This class defines a Recyclerview-List-Adapter for generic purposes to bind arbitrary elements to
+ * a simple Item. For this it uses an Extension Function for binding data to a ViewHolder.
+ * This can be done with onApplyDataToViewHolder.
+ *
+ */
 abstract class GenericListAdapter<Data,VH : RecyclerView.ViewHolder>(
     diffUtilCallback : DiffUtil.ItemCallback<Data>,
     protected val context : Context,

@@ -1,4 +1,4 @@
-package de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter
+package de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.legacy
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -14,6 +14,9 @@ import de.ericmuench.appsfactorytesttask.R
 /**
  * This class defines a Recyclerview Adapter for a Imaged Item as available in generic_imaged_item.xml
  * */
+@Deprecated("This class was used in an older Version of this App for RecyclerViews and " +
+        "is now replaced by GenericImagedItemListAdapter. It can still be used as a fallback if " +
+        "the newer solution has bugs or a wrong behaviour.")
 class GenericImagedItemAdapter<T>(
     context: Context,
     data: Iterable<T>

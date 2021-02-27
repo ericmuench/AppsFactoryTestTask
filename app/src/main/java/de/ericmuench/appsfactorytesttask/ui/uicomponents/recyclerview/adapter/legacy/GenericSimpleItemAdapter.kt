@@ -1,4 +1,4 @@
-package de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter
+package de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.legacy
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -13,6 +13,10 @@ import de.ericmuench.appsfactorytesttask.R
 /**
  * This class defines a Recyclerview Adapter for a Simple Item as available in generic_simple_item.xml
  * */
+
+@Deprecated("This class was used in an older Version of this App for RecyclerViews and " +
+        "is now replaced by GenericSimpleItemListAdapter.It can still be used as a fallback if " +
+        "the newer solution has bugs or a wrong behaviour.")
 class GenericSimpleItemAdapter<T>(
     context : Context,
     adapterData : Iterable<T>

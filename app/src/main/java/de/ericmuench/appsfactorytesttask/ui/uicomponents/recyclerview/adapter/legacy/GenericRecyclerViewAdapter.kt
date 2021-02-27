@@ -1,4 +1,4 @@
-package de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter
+package de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.legacy
 
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
@@ -9,6 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
  * This can be done with onApplyDataToViewHolder.
  *
  */
+@Deprecated("This class was used in an older Version of this App for RecyclerViews and " +
+        "is now replaced by GenericListAdapter. It can still be used as a fallback if " +
+        "the newer solution has bugs or a wrong behaviour.")
 abstract class GenericRecyclerViewAdapter<Data,VH: RecyclerView.ViewHolder>(
     protected val context : Context,
     adapterData : Iterable<Data>

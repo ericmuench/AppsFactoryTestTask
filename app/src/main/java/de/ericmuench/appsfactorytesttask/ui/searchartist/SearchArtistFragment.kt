@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import de.ericmuench.appsfactorytesttask.R
@@ -17,8 +18,8 @@ import de.ericmuench.appsfactorytesttask.model.runtime.Artist
 import de.ericmuench.appsfactorytesttask.ui.detail.ArtistDetailActivity
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseActivity
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.abstract_activities_fragments.BaseFragment
-import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.RecyclerViewScrollPositionDetector
+import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.listadapter.GenericSimpleItemListAdapter
 import de.ericmuench.appsfactorytesttask.util.extensions.*
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.SearchArtistViewModel
@@ -37,7 +38,7 @@ class SearchArtistFragment : BaseFragment() {
         SearchArtistViewModelFactory(application.dataRepository)
     }
 
-    private var recyclerViewAdapter : GenericSimpleItemAdapter<Artist>? = null
+    private var recyclerViewAdapter : GenericSimpleItemListAdapter<Artist>? = null
     private val recyclerViewPositionDetector = RecyclerViewScrollPositionDetector().apply {
         onEndReached = {
             activity?.castedAs<BaseActivity> {
@@ -113,20 +114,28 @@ class SearchArtistFragment : BaseFragment() {
                 LinearLayoutManager(act)
             }
 
-            recyclerViewAdapter = GenericSimpleItemAdapter(act, emptyList<Artist>()).apply {
-                setOnApplyDataToViewHolder { holder, artist, _ ->
-                    holder.txtText.text = artist.artistName
-                    holder.imageButton.visibility = View.INVISIBLE
-                    holder.cardView.setOnClickListener {
-                        switchToActivity<ArtistDetailActivity>(){
-                            putExtra(
-                                INTENT_KEY_SEARCH_ARTIST_TO_ARTIST_DETAIL_TRANSFERRED_ARTIST,
-                                artist
-                            )
-                        }
+            recyclerViewAdapter = GenericSimpleItemListAdapter(act,object : DiffUtil.ItemCallback<Artist>(){
+                override fun areItemsTheSame(oldItem: Artist, newItem: Artist): Boolean {
+                    return oldItem == newItem
+                }
+
+                override fun areContentsTheSame(oldItem: Artist, newItem: Artist): Boolean {
+                    return oldItem == newItem
+                }
+            })
+            recyclerViewAdapter?.setOnApplyDataToViewHolder { holder, artist, _ ->
+                holder.txtText.text = artist.artistName
+                holder.imageButton.visibility = View.INVISIBLE
+                holder.cardView.setOnClickListener {
+                    switchToActivity<ArtistDetailActivity>(){
+                        putExtra(
+                            INTENT_KEY_SEARCH_ARTIST_TO_ARTIST_DETAIL_TRANSFERRED_ARTIST,
+                            artist
+                        )
                     }
                 }
             }
+
             recyclerviewSearchArtist.adapter = recyclerViewAdapter
         }
     }
@@ -198,8 +207,9 @@ class SearchArtistFragment : BaseFragment() {
                 val recAdapter = recyclerViewAdapter
                 if(vmSearchData != null && recAdapter != null){
                     val allArtists = viewModel.allArtists
+                    recyclerViewAdapter?.submitList(allArtists)
 
-                    when {
+                    /*when {
                         allArtists.isEmpty() -> {
                             recAdapter.clearElements()
                         }
@@ -213,7 +223,7 @@ class SearchArtistFragment : BaseFragment() {
                             recAdapter.clearElements()
                             recAdapter.addElements(allArtists)
                         }
-                    }
+                    }*/
                 }
             }
         }
