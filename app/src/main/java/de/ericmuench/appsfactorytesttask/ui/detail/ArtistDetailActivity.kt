@@ -1,5 +1,7 @@
 package de.ericmuench.appsfactorytesttask.ui.detail
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.core.content.res.ResourcesCompat
@@ -8,13 +10,14 @@ import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.app.AppsFactoryTestTaskApplication
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_SEARCH_ARTIST_TO_ARTIST_DETAIL_TRANSFERRED_ARTIST
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_TRANSFER_ALBUM
+import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_TRANSFER_ALBUM_REFRESH_INDEX
+import de.ericmuench.appsfactorytesttask.app.constants.REQUEST_ARTIST_DETAIL_ALBUM_STORE_STATE_REFRESH
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Artist
-import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.legacy.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.listadapter.GenericSimpleItemListAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.scrolling.NestedScrollViewPositionDetector
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
-import de.ericmuench.appsfactorytesttask.util.extensions.switchToActivity
+import de.ericmuench.appsfactorytesttask.util.extensions.switchToActivityForResult
 import de.ericmuench.appsfactorytesttask.util.loading.LoadingState
 import de.ericmuench.appsfactorytesttask.viewmodel.ArtistDetailViewModel
 import de.ericmuench.appsfactorytesttask.viewmodel.ArtistDetailViewModelFactory
@@ -40,6 +43,7 @@ class ArtistDetailActivity : DetailActivity() {
     }
     //endregion
 
+    //region Lifecycle functions
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -56,6 +60,19 @@ class ArtistDetailActivity : DetailActivity() {
         //getting data from intent
         handleIntentData()
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(resultCode == Activity.RESULT_OK && requestCode == REQUEST_ARTIST_DETAIL_ALBUM_STORE_STATE_REFRESH){
+            //refresh the index in the recyclerview that switched to AlbumDetail-Activity
+            val refreshIdx = data?.getIntExtra(INTENT_KEY_TRANSFER_ALBUM_REFRESH_INDEX,-1) ?: -1
+            val recyclerViewItemCount = recyclerViewAdapter?.itemCount ?: 0
+            if(refreshIdx in 0 until recyclerViewItemCount){
+                recyclerViewAdapter?.notifyItemChanged(refreshIdx)
+            }
+        }
+    }
+    //endregion
 
     //region Functions for setup Layout
     /**This function assigns specific values for Artist-Details to UI-Fields*/
@@ -98,26 +115,38 @@ class ArtistDetailActivity : DetailActivity() {
             }
         )
 
-        recyclerViewAdapter?.setOnApplyDataToViewHolder { holder, album, _ ->
+        recyclerViewAdapter?.setOnApplyDataToViewHolder { holder, album, idx ->
             val drawableStore = ResourcesCompat.getDrawable(resources,R.drawable.ic_save,null)
-            val drawableUnStore = ResourcesCompat.getDrawable(resources,R.drawable.ic_remove_circle,null)
-            holder.imageButton.setImageDrawable(drawableStore)
-            holder.imageButton.setOnClickListener {
-                //TODO: Change action
-                if(holder.imageButton.drawable == drawableStore){
-                    holder.imageButton.setImageDrawable(drawableUnStore)
-                    return@setOnClickListener
-                }
+            val drawableUnstore = ResourcesCompat.getDrawable(resources,R.drawable.ic_remove_circle,null)
 
-                holder.imageButton.setImageDrawable(drawableStore)
+            holder.imageButton.isEnabled = false
+            viewModel.checkAlbumExistence(album, { handleError(it) }){ isStored ->
+                val draw = if(isStored) drawableUnstore else drawableStore
+                holder.imageButton.setImageDrawable(draw)
+                holder.imageButton.isEnabled = true
             }
 
+            holder.imageButton.setOnClickListener {
+                holder.imageButton.isEnabled = false
+                viewModel.switchStoreState(album, {
+                    handleError(it)
+                    holder.imageButton.isEnabled = true
+                }){success ->
+                    holder.imageButton.isEnabled = true
+                    if (success){
+                        notifyItemChanged(idx)
+                    }
 
+                }
+            }
 
             holder.txtText.text = album.title
             holder.cardView.setOnClickListener {
-                switchToActivity<AlbumDetailActivity>(){
+                switchToActivityForResult<AlbumDetailActivity>(
+                        REQUEST_ARTIST_DETAIL_ALBUM_STORE_STATE_REFRESH
+                ){
                     putExtra(INTENT_KEY_TRANSFER_ALBUM,album)
+                    putExtra(INTENT_KEY_TRANSFER_ALBUM_REFRESH_INDEX,idx)
                 }
             }
         }
@@ -141,7 +170,6 @@ class ArtistDetailActivity : DetailActivity() {
                     .description
                     .takeIf { it.isNotBlank() } ?: resources.getString(R.string.no_description_available)
                 setDescription(description)
-                //TODO: Handle Image with glide
             }
 
             val onlineUrlAvailable = viewModel.detailData.value?.onlineUrl != null
@@ -208,8 +236,5 @@ class ArtistDetailActivity : DetailActivity() {
             finish()
         }
     }
-    //endregion
-
-    //region Further functions
     //endregion
 }

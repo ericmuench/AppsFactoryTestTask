@@ -16,6 +16,9 @@ abstract class DetailViewModel<T> : ViewModel() {
     get() = _detailData
     //endregion
 
+    //region Field
+    //endregion
+
     //region functions
     /**
      * This function can be used to init the ViewModel-LiveData with a value that comes from

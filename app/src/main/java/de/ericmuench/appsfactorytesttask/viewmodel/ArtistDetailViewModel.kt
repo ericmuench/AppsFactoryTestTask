@@ -182,6 +182,44 @@ class ArtistDetailViewModel(private val dataRepository : DataRepository) : Detai
         _detailLoadingState.value = LoadingState.IDLE
     }
     //endregion
+
+    //region Functions for Storing Albums in Database
+    fun checkAlbumExistence(
+            album: Album,
+            onError : (Throwable) -> Unit = {},
+            onSuccess : (Boolean) -> Unit
+    ) = viewModelScope.launch {
+        when(val albumExistsResponse = dataRepository.isAlbumStored(album)){
+            is DataRepositoryResponse.Data -> onSuccess(albumExistsResponse.value)
+            is DataRepositoryResponse.Error -> onError(albumExistsResponse.error)
+        }
+    }
+
+    fun switchStoreState(
+            album: Album,
+            onError : (Throwable) -> Unit = {},
+            onDone : (Boolean) -> Unit
+    ) = viewModelScope.launch{
+        when(val albumExistsResponse = dataRepository.isAlbumStored(album)){
+            is DataRepositoryResponse.Data -> {
+                val isStored = albumExistsResponse.value
+
+                val storeResult = if(isStored){
+                    dataRepository.unstoreAlbum(album)
+                }
+                else{
+                    dataRepository.storeAlbum(album)
+                }
+
+                when(storeResult){
+                    is DataRepositoryResponse.Error -> onError(storeResult.error)
+                    is DataRepositoryResponse.Data -> onDone(storeResult.value)
+                }
+            }
+            is DataRepositoryResponse.Error -> onError(albumExistsResponse.error)
+        }
+    }
+    //endregion
 }
 
 class ArtistDetailViewModelFactory(private val repository: DataRepository) : ViewModelProvider.Factory {

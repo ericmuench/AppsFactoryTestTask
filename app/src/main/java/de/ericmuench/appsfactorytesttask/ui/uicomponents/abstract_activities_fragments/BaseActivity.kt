@@ -45,7 +45,7 @@ abstract class BaseActivity : AppCompatActivity() {
     //endregion
 
     //region own event functions for subclasses
-    protected fun onActionbarBackButtonPressed() = finish()
+     protected open fun onActionbarBackButtonPressed() = finish()
     //endregion
 
     //region Own Utility functions

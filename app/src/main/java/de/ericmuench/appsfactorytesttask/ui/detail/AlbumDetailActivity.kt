@@ -1,5 +1,6 @@
 package de.ericmuench.appsfactorytesttask.ui.detail
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
@@ -10,10 +11,11 @@ import com.bumptech.glide.Glide
 import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.app.AppsFactoryTestTaskApplication
 import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_TRANSFER_ALBUM
+import de.ericmuench.appsfactorytesttask.app.constants.INTENT_KEY_TRANSFER_ALBUM_REFRESH_INDEX
 import de.ericmuench.appsfactorytesttask.model.runtime.Album
 import de.ericmuench.appsfactorytesttask.model.runtime.Song
-import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.legacy.GenericSimpleItemAdapter
 import de.ericmuench.appsfactorytesttask.ui.uicomponents.recyclerview.adapter.listadapter.GenericSimpleItemListAdapter
+import de.ericmuench.appsfactorytesttask.util.extensions.finishWithResultData
 import de.ericmuench.appsfactorytesttask.util.extensions.notNull
 import de.ericmuench.appsfactorytesttask.viewmodel.AlbumDetailViewModel
 import de.ericmuench.appsfactorytesttask.viewmodel.AlbumsDetailViewModelFactory
@@ -42,7 +44,7 @@ class AlbumDetailActivity : DetailActivity() {
         setupLayout()
 
         //apply intent data
-        applyIntentDataOrFinish()
+        applyAlbumFromIntentOrFinish()
 
         //do existence check
         if(viewModel.isAlbumStored.value == null){
@@ -52,6 +54,15 @@ class AlbumDetailActivity : DetailActivity() {
         }
 
     }
+
+    override fun onActionbarBackButtonPressed() {
+        onGoBack()
+    }
+
+    override fun onBackPressed() {
+        onGoBack()
+    }
+
     //endregion
 
     //region Layout Setup Functions
@@ -142,10 +153,6 @@ class AlbumDetailActivity : DetailActivity() {
                 setDescription(description)
 
                 recyclerViewAdapter?.submitList(album.songs)
-                /*if(recyclerViewAdapter?.itemCount == 0){
-                    recyclerViewAdapter?.addElements(album.songs)
-                }*/
-
             }
         }
 
@@ -175,14 +182,22 @@ class AlbumDetailActivity : DetailActivity() {
     //endregion
 
     //region Intent Handling
-    private fun applyIntentDataOrFinish(){
+    private fun applyAlbumFromIntentOrFinish(){
         val albumFromIntent = intent?.getParcelableExtra<Album>(INTENT_KEY_TRANSFER_ALBUM)
 
         if(albumFromIntent != null){
             viewModel.initializeWithTransferredData(albumFromIntent)
         }
         else{
-            finish()
+            finishWithResultData(Activity.RESULT_CANCELED){}
+        }
+    }
+
+    private fun onGoBack(){
+        finishWithResultData(Activity.RESULT_OK){
+            //Return the index of this album in a Lists if transferred
+            val posIdx = intent.getIntExtra(INTENT_KEY_TRANSFER_ALBUM_REFRESH_INDEX,-1)
+            putExtra(INTENT_KEY_TRANSFER_ALBUM_REFRESH_INDEX,posIdx)
         }
     }
     //endregion
