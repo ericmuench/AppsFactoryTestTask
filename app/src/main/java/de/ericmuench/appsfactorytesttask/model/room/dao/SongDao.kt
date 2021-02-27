@@ -53,8 +53,15 @@ abstract class SongDao : BaseDao<StoredSong>{
     @Query("UPDATE songs SET title = :title, online_url = :onlineUrl WHERE sid == :songId;")
     abstract fun updateSong(songId: Long, title: String, onlineUrl : String?)
 
+    @Query("SELECT DISTINCT song_id FROM album_songs WHERE album_id == :albumId;")
+    abstract fun getSongIdsByAlbumId(albumId : Long) : List<Long>
+
     @Query("DELETE FROM songs;")
     abstract fun deleteAllSongs()
+
+    @Query("""DELETE FROM songs WHERE sid in (:songIds) 
+                   AND NOT EXISTS (SELECT song_id FROM album_songs WHERE song_id == sid);""")
+    abstract fun deleteSongsWithoutAlbumAndIds(songIds : List<Long>)
     //endregion
 
     //region Help Query-Functions

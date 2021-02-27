@@ -39,7 +39,7 @@ class AlbumDetailViewModel(private val dataRepository: DataRepository) : DetailV
 
         _isProcessing.value = LoadingState.LOADING
         if(isStored){
-            //unstoreAlbum(album,onError)
+            unstoreAlbum(album,onError)
         }
         else{
             storeAlbum(album,onError)

@@ -65,7 +65,7 @@ class DatabaseRepository(context : Context) {
                     ?: return@async DataRepositoryResponse.Error(Exception("Unable to insert Artist into Database"))
 
                 //album
-                val albumId = getAlbumIdByParams(album)
+                val albumId = getAlbumIdByTitleAndArtistId(album,artistId)//getAlbumIdByParams(album)
                     ?: storeAlbum(album, artistId)
                     ?: return@async DataRepositoryResponse.Error(Exception("Album Insert failed"))
 
@@ -76,6 +76,42 @@ class DatabaseRepository(context : Context) {
 
                 val albumSongs = dataMapper.mapRelationAlbumSongWithIds(storedSongIds,albumId)
                 albumDao.mergeAlbumSongs(albumSongs)
+
+                DataRepositoryResponse.Data(true)
+            }
+            catch (ex: Exception){
+                DataRepositoryResponse.Error(ex)
+            }
+        }
+
+        responseDef.await()
+    }
+
+    suspend fun unstoreAlbumWithAssociatedData(
+        album: Album,
+        artist : Artist
+    ) : DataRepositoryResponse<Boolean,Throwable> = coroutineScope {
+        val responseDef  = async(Dispatchers.IO){
+            try {
+                //get data
+                val artistId = getStoredArtistIdByName(artist.artistName)
+                    ?: return@async DataRepositoryResponse.Error(Exception("Unable to find Artist in Database"))
+
+                val albumId = getAlbumIdByTitleAndArtistId(album,artistId)//getAlbumIdByParams(album)
+                    ?: return@async DataRepositoryResponse.Error(Exception("Album could not be found"))
+
+                val storedSongIdsOfAlbum = songDao.getSongIdsByAlbumId(albumId)
+
+                //delete album
+                albumDao.deleteElementByAlbumId(albumId)
+
+                //delete artist if he has no albums in the Database left
+                if(!albumDao.artistHasAlbums(artistId)){
+                    artistDao.deleteElementById(artistId)
+                }
+
+                //delete songs if they are not in another Album
+                songDao.deleteSongsWithoutAlbumAndIds(storedSongIdsOfAlbum)
 
                 DataRepositoryResponse.Data(true)
             }
@@ -197,6 +233,16 @@ class DatabaseRepository(context : Context) {
     private suspend fun getAlbumIdByParams(album : Album) : Long? = coroutineScope{
         val albumIdDef = async(Dispatchers.IO){
             albumDao.getAlbumIdsByParams(album.title,album.mbid,album.description,album.onlineUrl,album.imgUrl)
+                .takeIf { it.size == 1 }
+                ?.first()
+        }
+
+        return@coroutineScope albumIdDef.await()
+    }
+
+    private suspend fun getAlbumIdByTitleAndArtistId(album : Album,artistId : Long) : Long? = coroutineScope{
+        val albumIdDef = async(Dispatchers.IO){
+            albumDao.getAlbumIdByTitleAndArtistId(album.title,artistId)
                 .takeIf { it.size == 1 }
                 ?.first()
         }

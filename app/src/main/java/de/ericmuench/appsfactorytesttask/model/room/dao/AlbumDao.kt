@@ -38,6 +38,14 @@ abstract class AlbumDao : BaseDao<StoredAlbum>{
                    WHERE title LIKE :albumTitle AND artist_name LIKE :artistName);""")
     abstract fun isAlbumStoredByTitleAndArtistName(albumTitle : String,artistName : String) : Boolean
 
+    @Query("""SELECT DISTINCT alid FROM albums INNER JOIN artists ON artists.arid == artist_id
+                   WHERE albums.title LIKE :albumTitle AND artists.artist_name LIKE :artistName;""")
+    abstract fun getAlbumIdByTitleAndArtistName(albumTitle : String,artistName : String) : List<Long>
+
+    @Query("""SELECT DISTINCT alid FROM albums 
+                   WHERE title LIKE :albumTitle AND artist_id == :artistId;""")
+    abstract fun getAlbumIdByTitleAndArtistId(albumTitle : String,artistId : Long) : List<Long>
+
     @Query("""SELECT alid FROM albums WHERE 
                     title LIKE :title AND 
                     mbid LIKE :mbid AND 
@@ -52,6 +60,13 @@ abstract class AlbumDao : BaseDao<StoredAlbum>{
         onlineUrl: String?,
         imgUrl: String?
     ) : List<Long>
+
+    @Query("SELECT EXISTS(SELECT alid FROM albums WHERE artist_id == :artistId);")
+    abstract fun artistHasAlbums(artistId: Long) : Boolean
+
+
+    @Query("DELETE FROM albums WHERE alid == :albumId;")
+    abstract fun deleteElementByAlbumId(albumId : Long)
     //endregion
 
     //region Help Query-Functions

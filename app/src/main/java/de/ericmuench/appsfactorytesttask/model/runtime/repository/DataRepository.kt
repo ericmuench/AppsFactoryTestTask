@@ -141,7 +141,7 @@ class DataRepository(context : Context){
             ?: return@coroutineScope DataRepositoryResponse.Error(
                 Exception("Album could not be stored. Artist could not be found")
             )
-        return@coroutineScope databaseRepository.storeAlbumWithAssociatedData(album,artist)
+        return@coroutineScope databaseRepository.unstoreAlbumWithAssociatedData(album,artist)
     }
 
     //endregion

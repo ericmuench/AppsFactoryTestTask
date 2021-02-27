@@ -18,11 +18,14 @@ abstract class ArtistDao : BaseDao<StoredArtist> {
     val idGenerator = idGeneratorSequence.iterator()
     //endregion
 
-    @Query("SELECT arid FROM artists WHERE artist_name LIKE :artistName;")
+    @Query("SELECT DISTINCT arid FROM artists WHERE artist_name LIKE :artistName;")
     abstract fun getArtistIdsByName(artistName : String) : List<Long>
 
     @Query("SELECT * FROM artists WHERE arid == :id;")
     abstract fun getArtistsById(id : Long) : List<StoredArtist>
+
+    @Query("DELETE FROM artists WHERE arid == :artistId;")
+    abstract fun deleteElementById(artistId : Long)
     //endregion
 
     //region Help Query-Functions
