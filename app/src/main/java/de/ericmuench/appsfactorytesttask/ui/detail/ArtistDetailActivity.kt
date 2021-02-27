@@ -136,7 +136,6 @@ class ArtistDetailActivity : DetailActivity() {
                     if (success){
                         notifyItemChanged(idx)
                     }
-
                 }
             }
 

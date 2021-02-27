@@ -27,9 +27,13 @@ import kotlinx.coroutines.coroutineScope
 
 
 /**
- * This class is responsible for all API-Calls to LastFm-API
+ * This class is responsible for all API-Calls to LastFm-API. For this, it uses the Fuel-Library
+ * to get JSON-Data from the Web. After that, it checks whether the Properties of the JSON
+ * match with a specified class to return and returns a Fuel-Result, which can be examined in other
+ * Architecture Layers. The manual JSON-Property-Check is necessary given that LastFm does not always
+ * return a error-indicating Status-Code if something has gone wrong but an Error-Object instead.
+ * This error object needs to be mapped to an Exception.
  *
- * TODO: further documentation
  */
 class LastFmApiClient {
     //companion
@@ -228,7 +232,6 @@ class LastFmApiClient {
      * This function gets all valid TopAlbums of an Artist with all its information based on the
      * LastFM-Response for a certain amount of TopAlbums.
      *
-     * @param mbidOfArtist The mbid of the Artist
      * @param topAlbumFromLastFm The Top-Albums response from LastFM
      *
      * @return all valid Top-Albums with all their information. Those information are acquired by

@@ -118,7 +118,7 @@ class DataRepository(
     suspend fun storeAlbum(album: Album) : DataRepositoryResponse<Boolean, Throwable> = coroutineScope {
         val artistDef = async(Dispatchers.IO){
             //loading artist for an album: Usually the artist should be in the cache of the runtime repo
-            //TODO: check if this is ok or if its better to fetch artist from network
+            // if he/she is not in the runtime repo and not in the DB, storing will fail
             runtimeRepository.getArtistByNameFromCache(album.artistName)
         }
 

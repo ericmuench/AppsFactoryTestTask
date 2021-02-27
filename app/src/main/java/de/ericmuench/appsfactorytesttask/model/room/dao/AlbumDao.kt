@@ -26,7 +26,8 @@ abstract class AlbumDao : BaseDao<StoredAlbum>{
     abstract fun getAlbumById(id : Long) : StoredAlbum?
 
     @Query("""SELECT DISTINCT albums.alid, albums.title, albums.image_url ,artists.artist_name
-                   FROM albums JOIN artists ON albums.artist_id == artists.arid;""")
+                   FROM albums JOIN artists ON albums.artist_id == artists.arid
+                   ORDER BY albums.alid DESC;""")
     abstract fun getAllAlbumsLiveData() : LiveData<List<StoredAlbumInfo>>
 
     @Query("SELECT alid FROM albums WHERE title LIKE :albumTitle;")
