@@ -1,9 +1,6 @@
 package de.ericmuench.appsfactorytesttask.model.room.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import de.ericmuench.appsfactorytesttask.model.room.StoredSong
 
 @Dao
@@ -24,11 +21,40 @@ abstract class SongDao : BaseDao<StoredSong>{
     //endregion
 
     //region Functions
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun mergeAll(songs : List<StoredSong>)
+    /**
+     * This function takes a List of Tuples of StoredSong and Boolean. If the Boolean is TRUE then
+     * the associated StoredSong does already exist and needs to be updated, otherwise it needs to
+     * be inserted.
+     * */
+    fun mergeAll(songs : Iterable<Pair<StoredSong,Boolean>>){
+        songs.forEach {
+            val isAlreadyInDatabase = it.second
+            if(isAlreadyInDatabase){
+                updateSong(it.first.sid,it.first.title,it.first.onlineUrl)
+            }
+            else{
+                insertElement(it.first)
+            }
+        }
+    }
 
     @Query("SELECT * FROM songs WHERE sid IN (:idRange); ")
     abstract fun getAllInIdRange(idRange : List<Int>) : List<StoredSong>
+
+    @Query("""SELECT DISTINCT sid FROM songs 
+                   INNER JOIN album_songs ON album_songs.song_id == songs.sid 
+                   INNER JOIN albums ON album_songs.album_id == albums.alid
+                   WHERE songs.title LIKE :title AND albums.artist_id == :artistId;""")
+    abstract fun getSongIdForTitleAndArtist(title: String, artistId : Long) : List<Long>
+
+    @Query("SELECT * FROM songs WHERE sid == :songId;")
+    abstract fun getSongById(songId: Long) : StoredSong?
+
+    @Query("UPDATE songs SET title = :title, online_url = :onlineUrl WHERE sid == :songId;")
+    abstract fun updateSong(songId: Long, title: String, onlineUrl : String?)
+
+    @Query("DELETE FROM songs;")
+    abstract fun deleteAllSongs()
     //endregion
 
     //region Help Query-Functions

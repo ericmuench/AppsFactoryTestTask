@@ -37,6 +37,21 @@ abstract class AlbumDao : BaseDao<StoredAlbum>{
     @Query("""SELECT EXISTS(SELECT alid FROM albums INNER JOIN artists ON artists.arid == artist_id  
                    WHERE title LIKE :albumTitle AND artist_name LIKE :artistName);""")
     abstract fun isAlbumStoredByTitleAndArtistName(albumTitle : String,artistName : String) : Boolean
+
+    @Query("""SELECT alid FROM albums WHERE 
+                    title LIKE :title AND 
+                    mbid LIKE :mbid AND 
+                    description LIKE :description AND
+                    online_url LIKE :onlineUrl AND
+                    image_url LIKE :imgUrl;"""
+    )
+    abstract fun getAlbumIdsByParams(
+        title : String,
+        mbid : String?,
+        description : String,
+        onlineUrl: String?,
+        imgUrl: String?
+    ) : List<Long>
     //endregion
 
     //region Help Query-Functions

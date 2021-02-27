@@ -4,9 +4,8 @@ import androidx.room.*
 
 @Dao
 interface BaseDao<T> {
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun mergeElement(element : T)
+    @Insert
+    fun insertElement(element : T)
 
     @Delete
     fun deleteElement(element : T)

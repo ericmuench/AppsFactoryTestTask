@@ -39,11 +39,10 @@ class AlbumDetailViewModel(private val dataRepository: DataRepository) : DetailV
 
         _isProcessing.value = LoadingState.LOADING
         if(isStored){
-            //TODO: Implement Unstore
+            //unstoreAlbum(album,onError)
         }
         else{
             storeAlbum(album,onError)
-
         }
 
         _isProcessing.value = LoadingState.IDLE
@@ -54,6 +53,18 @@ class AlbumDetailViewModel(private val dataRepository: DataRepository) : DetailV
             is DataRepositoryResponse.Data -> {
                 detailData.value.notNull {
                     println("storing was successful : ${storeResponse.value}")
+                    checkAlbumExistence(album, onError)
+                }
+            }
+            is DataRepositoryResponse.Error -> onError(storeResponse.error)
+        }
+    }
+
+    private suspend fun unstoreAlbum(album: Album, onError : (Throwable) -> Unit = {}) = coroutineScope{
+        when(val storeResponse = dataRepository.unstoreAlbum(album)){
+            is DataRepositoryResponse.Data -> {
+                detailData.value.notNull {
+                    println("unstoring was successful : ${storeResponse.value}")
                     checkAlbumExistence(album, onError)
                 }
             }

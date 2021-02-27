@@ -121,6 +121,29 @@ class DataRepository(context : Context){
         return@coroutineScope databaseRepository.storeAlbumWithAssociatedData(album,artist)
     }
 
+
+    /**
+     * This function can remove an Album in the local Database. Before it has to look up the Artist
+     * for the Album in the Cache of the Runtime-Repository.
+     *
+     * @param album The Album that should be stored(merged)
+     *
+     * @return A DataRepository-Response whether the Insert was successful or an Error
+     * */
+    suspend fun unstoreAlbum(album: Album) : DataRepositoryResponse<Boolean,Throwable> = coroutineScope {
+        val artistDef = async(Dispatchers.IO){
+            //loading artist for an album: Usually the artist should be in the cache of the runtime repo
+            //TODO: check if this is ok or if its better to fetch artist from network
+            runtimeRepository.getArtistByNameFromCache(album.artistName)
+        }
+
+        val artist = artistDef.await()
+            ?: return@coroutineScope DataRepositoryResponse.Error(
+                Exception("Album could not be stored. Artist could not be found")
+            )
+        return@coroutineScope databaseRepository.storeAlbumWithAssociatedData(album,artist)
+    }
+
     //endregion
 
 }

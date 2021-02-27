@@ -18,7 +18,6 @@ abstract class ArtistDao : BaseDao<StoredArtist> {
     val idGenerator = idGeneratorSequence.iterator()
     //endregion
 
-    //region Functions
     @Query("SELECT arid FROM artists WHERE artist_name LIKE :artistName;")
     abstract fun getArtistIdsByName(artistName : String) : List<Long>
 
