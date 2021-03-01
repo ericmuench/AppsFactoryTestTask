@@ -161,10 +161,9 @@ class SearchArtistFragment : BaseFragment() {
                             viewModel.artistSearchQuery = queryNN
 
                             activity?.castedAs<BaseActivity> { baseActivity ->
-
                                 val hasInternet = baseActivity.internetConnectivityChecker
-                                    .internetConnectivityState
-                                    .hasInternetConnection
+                                        .internetConnectivityState
+                                        .hasInternetConnection
                                 viewModel.submitArtistSearchQuery(hasInternet){
                                     handleError(it)
                                 }

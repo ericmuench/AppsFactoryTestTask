@@ -19,7 +19,10 @@ abstract class BaseActivity : AppCompatActivity() {
 
     //region Fields
     val internetConnectivityChecker : InternetConnectivityChecker
-        = AppsFactoryTestTaskApplication.internetConnectivityChecker
+    get(){
+        val app = application as AppsFactoryTestTaskApplication
+        return app.internetConnectivityChecker
+    }
     //endregion
 
     override fun onCreate(savedInstanceState: Bundle?) {
