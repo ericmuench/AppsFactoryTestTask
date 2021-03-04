@@ -2,7 +2,6 @@ package de.ericmuench.appsfactorytesttask.model.repository
 
 import android.content.Context
 import androidx.lifecycle.LiveData
-import de.ericmuench.appsfactorytesttask.R
 import de.ericmuench.appsfactorytesttask.clerk.mapper.DatabaseModelToRuntimeMapper
 import de.ericmuench.appsfactorytesttask.clerk.network.LastFmApiClient
 import de.ericmuench.appsfactorytesttask.model.repository.util.DataRepositoryResponse
@@ -119,11 +118,15 @@ class DataRepository(
         val artistDef = async(Dispatchers.IO){
             //loading artist for an album: Usually the artist should be in the cache of the runtime repo
             // if he/she is not in the runtime repo and not in the DB, storing will fail
-            runtimeRepository.getArtistByNameFromCache(album.artistName)
+            runtimeRepository.getArtistByName(true,album.artistName)
         }
 
+        val artistRes = artistDef.await()
 
-        return@coroutineScope databaseRepository.storeAlbumWithAssociatedData(album,artistDef.await())
+        return@coroutineScope when(artistRes){
+            is DataRepositoryResponse.Error -> DataRepositoryResponse.Error(artistRes.error)
+            is DataRepositoryResponse.Data -> databaseRepository.storeAlbumWithAssociatedData(album,artistRes.value)
+        }
     }
 
 
