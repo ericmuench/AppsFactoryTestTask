@@ -16,6 +16,7 @@
     <string name="reload">Reload</string>
     <string name="album_cover">Album Cover</string>
     <string name="background_image">Background Image</string>
+    <string name="by_author">By Eric Münch</string>
 
     <!--Errors and Similar Strings-->
     <string name="error_template_try_again">An Error occurred:#Please try again!</string>
