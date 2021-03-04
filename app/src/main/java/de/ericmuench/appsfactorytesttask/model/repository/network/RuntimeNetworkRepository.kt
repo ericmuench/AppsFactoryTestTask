@@ -111,7 +111,12 @@ class RuntimeNetworkRepository(
      * @param artistName The name of the Artist to uniquely identify the Artist (Ids are not provided
      * by LastFM)
      * @param startPage The page to start with in the Result
-     * @param start
+     * @param limitPerPage The amount of Top albums to fetch per Page
+     * @param shouldRefreshRuntimeCache Whether the cache for a certain artistName should be deleted
+     * to ensure a clean reload
+     *
+     * @return A DataRepositoryResponse containing either a TopAlbumOfArtistResult with a certain
+     * amount of Albums for an Artist or an Error.
      *
      *
      * */
@@ -122,11 +127,19 @@ class RuntimeNetworkRepository(
         limitPerPage : Int,
         shouldRefreshRuntimeCache : Boolean,
     ): DataRepositoryResponse<TopAlbumOfArtistResult, Throwable> = coroutineScope{
-        //looking for cached result
+
+        //delete cache if necessary and Internet available
         if(shouldRefreshRuntimeCache){
+            if(!hasInternet){
+                return@coroutineScope DataRepositoryResponse.Error(
+                        createThrowable(R.string.no_internet_connection)
+                )
+            }
             topAlbumResultsRuntimeStorage.remove(artistName)
         }
 
+
+        //looking for cached result
         val cachedResult = topAlbumResultsRuntimeStorage[artistName]
         if(cachedResult != null && cachedResult.isNotEmpty()){
             val cachedPageDef = async(Dispatchers.IO){ cachedResult.find { it.page == startPage } }

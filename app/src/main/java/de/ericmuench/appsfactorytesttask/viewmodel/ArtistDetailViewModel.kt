@@ -77,7 +77,10 @@ class ArtistDetailViewModel(private val dataRepository : DataRepository) : Detai
                 }
 
                 launch {
-                    _topAlbumResults.value = emptyList()
+                    if(hasInternet){
+                        _topAlbumResults.value = emptyList()
+                    }
+
                     loadAlbumData(
                         hasInternet = hasInternet,
                         onError = onErrorHandler,
